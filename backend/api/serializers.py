@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from . import models as mod
+from . import models
 
 
 class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
@@ -9,7 +9,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
     '''
 
     class Meta:
-        model = mod.Recipe
+        model = models.Recipe
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -18,7 +18,7 @@ class TagSerializer(serializers.ModelSerializer):
     '''
 
     class Meta:
-        model = mod.Tag
+        model = models.Tag
         fields = '__all__'
 
 
@@ -28,5 +28,5 @@ class IngredientSerializer(serializers.ModelSerializer):
     '''
 
     class Meta:
-        model = mod.Ingredient
+        model = models.Ingredient
         fields = '__all__'
