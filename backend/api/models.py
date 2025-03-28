@@ -36,4 +36,16 @@ class Ingredient(models.Model):
     '''
     Модель для ингредиентов.
     '''
-    pass
+    name = models.CharField(
+        max_length=250,
+        db_index=True,
+        verbose_name='Ингредиент',
+    )
+
+    class Meta:
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
