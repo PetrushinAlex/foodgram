@@ -1,11 +1,6 @@
 from django.db import models
 
-
-class Recipe(models.Model):
-    '''
-    Модель для рецептов.
-    '''
-    pass
+from tools import constants as cnst
 
 
 class Tag(models.Model):
@@ -14,7 +9,7 @@ class Tag(models.Model):
     '''
 
     name = models.CharField(
-        max_length=250,
+        max_length=cnst.MAX_LENGHT_NAME,
         db_index=True,
         verbose_name='Тэг',
     )
@@ -37,7 +32,7 @@ class Ingredient(models.Model):
     Модель для ингредиентов.
     '''
     name = models.CharField(
-        max_length=250,
+        max_length=cnst.MAX_LENGHT_NAME,
         db_index=True,
         verbose_name='Ингредиент',
     )
@@ -49,3 +44,18 @@ class Ingredient(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Recipe(models.Model):
+    '''
+    Модель для рецептов.
+    '''
+
+    name = models.CharField(
+        max_length=cnst.MAX_LENGHT_NAME,
+        db_index=True,
+        verbose_name='Рецепт',
+    )
+    text = models.TextField(
+        verbose_name='Описание рецепта',
+    )
