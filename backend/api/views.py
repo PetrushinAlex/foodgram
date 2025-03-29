@@ -1,6 +1,7 @@
+from ..food import models
 from rest_framework import viewsets
 
-from . import models, serializers
+from . import serializers
 
 
 class RecipeViewSet(viewsets.GenericViewSet):
