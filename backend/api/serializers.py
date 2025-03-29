@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from . import models
+from ..food import models
 
 
 class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
