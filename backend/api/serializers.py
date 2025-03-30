@@ -1,15 +1,11 @@
-from rest_framework import serializers
+from django.contrib.auth import get_user_model
+from rest_framework import relations, serializers
+from drf_extra_fields.fields import Base64ImageField
 
 from ..food import models
 
 
-class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
-    '''
-    Сериализатор для создания/обновления рецепта (на основе модели рецепта).
-    '''
-
-    class Meta:
-        model = models.Recipe
+User = get_user_model()
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -30,3 +26,18 @@ class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Ingredient
         fields = '__all__'
+
+
+class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
+    '''
+    Сериализатор для создания/обновления рецепта (на основе модели рецепта).
+    '''
+
+    image = Base64ImageField()
+    tags = relations.PrimaryKeyRelatedField(
+        queryset=models.Tag.objects.all(),
+        many=True,
+    )
+
+    class Meta:
+        model = models.Recipe
