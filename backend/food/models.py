@@ -118,7 +118,7 @@ class RecipeIngredient(models.Model):
 
     class Meta:
         verbose_name = 'Ингредиент рецепта'
-        verbose_name_plural = 'Интгредиенты рецептов'
+        verbose_name_plural = 'Ингредиенты рецепта'
         ordering = ['id']
 
     def __str__(self):
