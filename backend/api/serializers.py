@@ -41,3 +41,19 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Recipe
+
+class RecipeIngredientSerializer(serializers.ModelSerializer):
+    '''
+    Сериализатор для ингридиентов под рецепты.
+    '''
+
+    id = serializers.ReadOnlyField(
+        source='ingredient.id',
+    )
+    name = serializers.ReadOnlyField(
+        source='ingredient.id',
+    )
+
+    class Meta:
+        model = models.RecipeIngredient
+        fields = '__all__'
