@@ -123,3 +123,24 @@ class RecipeIngredient(models.Model):
 
     def __str__(self):
         return self.ingredient.name
+
+
+class RecipeTag(models.Model):
+    '''
+    Модель для тэга рецепта, создающая
+    промежуточную таблице (many-to-many связь).
+    '''
+
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='recipe_tags',
+        verbose_name='Рецепт',
+    )
+    
+    tag = models.ForeignKey(
+        Tag,
+        on_delete=models.CASCADE,
+        related_name='recipe_tags',
+        verbose_name='Тэг',
+    )
