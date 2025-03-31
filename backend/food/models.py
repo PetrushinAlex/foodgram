@@ -94,3 +94,32 @@ class Recipe(models.Model):
     
     def __str__(self):
         return self.name
+
+
+class RecipeIngredient(models.Model):
+    '''
+    Модель для ингредиентов в рецептах, создающая
+    промежуточную таблице (many-to-many связь).
+    '''
+
+    ingredient = models.ForeignKey(
+        Ingredient,
+        on_delete=models.CASCADE,
+        related_name='recipe_ingredients',
+        verbose_name='Ингредиент',
+    )
+
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='recipe_ingredients',
+        verbose_name='Рецепт',
+    )
+
+    class Meta:
+        verbose_name = 'Ингредиент рецепта'
+        verbose_name_plural = 'Интгредиенты рецептов'
+        ordering = ['id']
+
+    def __str__(self):
+        return self.ingredient.name
