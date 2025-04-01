@@ -57,3 +57,16 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.RecipeIngredient
         fields = '__all__'
+
+
+class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
+    '''
+    Сериализатор для создания ингредиентов в рецептах.
+    '''
+
+    id = serializers.IntegerField()
+    amount = serializers.IntegerField()
+
+    class Meta:
+        model = models.Ingredient
+        fields = ('id', 'amount',)
