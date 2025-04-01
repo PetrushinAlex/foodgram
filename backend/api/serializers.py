@@ -41,6 +41,28 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Recipe
+    
+
+class RecipeListSerializer(serializers.ModelSerializer):
+    '''
+    Сериализатор для получения списка рецептов.
+    '''
+
+    author = ...
+    image = serializers.ReadOnlyField(
+        source='image.url',
+    )
+    tags = TagSerializer(
+        many=True,
+    )
+    ingredients = IngredientSerializer(
+        many=True,
+    )
+
+    class Meta:
+        model = models.Recipe
+        fields = '__all__'
+
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
     '''
