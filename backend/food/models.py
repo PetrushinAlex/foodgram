@@ -102,18 +102,20 @@ class RecipeIngredient(models.Model):
     промежуточную таблице (many-to-many связь).
     '''
 
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='recipe_ingredients',
+        verbose_name='Рецепт',
+    )
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
         related_name='recipe_ingredients',
         verbose_name='Ингредиент',
     )
-
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        related_name='recipe_ingredients',
-        verbose_name='Рецепт',
+    amount = models.PositiveSmallIntegerField(
+        verbose_name='Количество ингредиента',
     )
 
     class Meta:
@@ -137,10 +139,16 @@ class RecipeTag(models.Model):
         related_name='recipe_tags',
         verbose_name='Рецепт',
     )
-    
     tag = models.ForeignKey(
         Tag,
         on_delete=models.CASCADE,
         related_name='recipe_tags',
         verbose_name='Тэг',
     )
+
+    class Meta:
+        verbose_name = 'Тэг рецепта'
+        verbose_name_plural = 'Тэги рецепта'
+    
+    def __str__(self):
+        return self.tag.name
