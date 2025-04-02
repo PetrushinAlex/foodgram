@@ -156,3 +156,50 @@ class RecipeTag(models.Model):
     
     def __str__(self):
         return self.tag.name
+
+
+class ShoppingCart(models.Model):
+    '''
+    Модель для корзины рецептов конкретного юзера, создающая 
+    промежуточную таблицу между соответствующими моделями (many-to-many связь).
+    '''
+
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='shopping_cart',
+        verbose_name='Рецепт',
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='shopping_cart',
+        verbose_name='Пользователь',
+    )
+
+    class Meta:
+        verbose_name = 'Корзина'
+        verbose_name_plural = 'Корзины'
+
+
+class Favorite(models.Model):
+    '''
+    Модель для любимых рецептов конкретного юзера, создающая 
+    промежуточную таблицу между соответствующими моделями (many-to-many связь).
+    '''
+    
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='favorite',
+        verbose_name='Рецепт',
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='favorite',
+        verbose_name='Пользователь',
+    )
+
+    class Meta:
+        verbose_name = 'Избранное'
