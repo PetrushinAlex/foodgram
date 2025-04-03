@@ -8,9 +8,16 @@ class CustomUser(AbstractUser):
     '''
     Модель пользователя на основе импортируемой абстрактной модели.
     '''
-    email = models.EmailField(
-        verbose_name='Электронная почта',
+
+    username = models.CharField(
         max_length=cnst.MAX_LENGHT_NAME,
+        verbose_name='Название аккаунта',
+        unique=True,
+        db_index=True,
+    )
+    email = models.EmailField(
+        max_length=cnst.MAX_LENGHT_NAME,
+        verbose_name='Электронная почта',
         unique=True,
     )
     first_name = models.CharField(
