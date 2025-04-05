@@ -1,3 +1,12 @@
-from django.shortcuts import render
+from djoser.views import UserViewSet
 
-# Create your views here.
+from . import models, serializers
+
+
+class CustomUserViewSet(UserViewSet):
+    '''
+    Кастомное представление для пользователей.
+    '''
+
+    queryset = models.CustomUser.objects.all()
+    serializer_class = serializers.CustomUserSerializer
