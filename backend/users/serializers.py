@@ -1,7 +1,10 @@
+from django.contrib.auth import get_user_model
 from djoser.serializers import UserCreateSerializer, UserSerializer
+from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 
-from . import models
+
+User = get_user_model()
 
 
 class CustomUserSerializer(UserSerializer):
@@ -12,7 +15,7 @@ class CustomUserSerializer(UserSerializer):
     is_subscribed = SerializerMethodField()
 
     class Meta:
-        model = models.CustomUser
+        model = User
         fields = (
             'id',
             'username',
@@ -29,7 +32,7 @@ class CustomUserCreateSerializer(UserCreateSerializer):
     """
 
     class Meta:
-        model = models.CustomUser
+        model = User
         fields = (
             'id',
             'username',
@@ -37,4 +40,33 @@ class CustomUserCreateSerializer(UserCreateSerializer):
             'first_name',
             'last_name',
             'password',
+        )
+
+
+class SubSerializer(CustomUserSerializer):
+    '''
+    Сериализатор на основе сериализатора кастомного пользователя
+    с информацией про подписки.
+    '''
+
+    recipes = serializers.SerializerMethodField()
+    recipe_quantity = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+            'recipes',
+            'recipe_quantity',
+        )
+        read_only_fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
         )
