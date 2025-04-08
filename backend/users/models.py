@@ -47,13 +47,13 @@ class Sub(models.Model):
     user = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
-        related_name='subs',
+        related_name='subscriber',
         verbose_name='Подписчик',
     )
     author = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
-        related_name='subs',
+        related_name='subscription',
         verbose_name='Автор',
     )
 
