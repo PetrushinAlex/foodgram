@@ -45,13 +45,13 @@ class Sub(models.Model):
     '''
 
     user = models.ForeignKey(
-        AbstractUser,
+        CustomUser,
         on_delete=models.CASCADE,
         related_name='subs',
         verbose_name='Подписчик',
     )
     author = models.ForeignKey(
-        AbstractUser,
+        CustomUser,
         on_delete=models.CASCADE,
         related_name='subs',
         verbose_name='Автор',
