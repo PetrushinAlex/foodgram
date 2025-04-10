@@ -11,7 +11,8 @@ User = get_user_model()
 
 class CustomUserSerializer(UserSerializer):
     '''
-    Сериализатор для кастомного пользователя.
+    Сериализатор для кастомного пользователя с дополнительной
+    информацией (о подписке).
     '''
 
     is_subscribed = SerializerMethodField()
@@ -26,6 +27,12 @@ class CustomUserSerializer(UserSerializer):
             'last_name',
             'is_subscribed',
         )
+
+    def get_is_subscribed(self, obj):
+        user = self.context.get('request').user
+        if user.is_anonymous:
+            return False
+        return user.subscriber.filter(author=obj).exists()
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
