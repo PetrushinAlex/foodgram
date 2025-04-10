@@ -3,10 +3,14 @@ from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
 from rest_framework import serializers, status
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.permissions import (
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly
+)
 
-from . import models, serializers
+from . import models, serializers as srls
+from tools import paginators
 
 
 User = get_user_model()
@@ -18,7 +22,9 @@ class CustomUserViewSet(UserViewSet):
     '''
 
     queryset = User.objects.all()
-    serializer_class = serializers.CustomUserSerializer
+    serializer_class = srls.CustomUserSerializer
+    pagination_class = paginators.CustomPaginator
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
     @action(
         detail=True,
@@ -33,7 +39,7 @@ class CustomUserViewSet(UserViewSet):
         )
 
         if request.method == 'POST':
-            serializer = serializers.SubSerializer(
+            serializer = srls.SubSerializer(
                 author,
                 data=request.data,
                 context={'request': request},
@@ -52,7 +58,23 @@ class CustomUserViewSet(UserViewSet):
             subscription = get_object_or_404(
                 models.Sub, 
                 user=user, 
-                author=author
+                author=author,
             )
             subscription.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    @action(
+        detail=False,
+        permission_classes=[IsAuthenticated],
+    )
+    def subscriptions(self, request):
+        queryset = User.objects.filter(
+            subscription__user=request.user,
+        )
+        pages = self.paginate_queryset(queryset)
+        serializer = srls.SubSerializer(
+            pages, 
+            many=True, 
+            context={"request": request},
+        )
+        return self.get_paginated_response(serializer.data)
