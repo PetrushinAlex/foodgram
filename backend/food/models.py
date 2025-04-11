@@ -18,8 +18,13 @@ class Tag(models.Model):
         verbose_name='Тэг',
     )
     color = models.CharField(
-        max_length=10,
-        verbose_name='слаг',
+        max_length=cnst.MAX_LENGHT_SMALL,
+        verbose_name='Цвет',
+    )
+    slug = models.SlugField(
+        max_length=cnst.MAX_LENGHT_NAME,
+        verbose_name='Слаг',
+        unique=True,
     )
 
     class Meta:
@@ -49,6 +54,12 @@ class Ingredient(models.Model):
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
         ordering = ['name']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['name', 'measurement_unit'],
+                name='uniqe_name_unit',
+            )
+        ]
 
     def __str__(self):
         return self.name
