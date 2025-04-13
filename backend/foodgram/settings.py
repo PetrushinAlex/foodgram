@@ -105,6 +105,22 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+DJOSER = {
+    "LOGIN_FIELD": "email",
+    "HIDE_USERS": False,
+    "SERIALIZERS": {
+        'user': 'users.serializers.CustomUserSerializer',
+        'current_user': 'users.serializers.CustomUserSerializer',
+        'user_create': 'users.serializers.CustomUserCreateSerializer',
+    },
+    "PERMISSIONS": {
+        'user': ['rest_framework.permissions.AllowAny'],
+        'user_list': ['rest_framework.permissions.AllowAny'],
+        'user_create': ['rest_framework.permissions.AllowAny'],
+    },
+}
+
+
 LANGUAGE_CODE = 'ru'
 
 TIME_ZONE = 'UTC'
