@@ -127,37 +127,6 @@ class Recipe(models.Model):
         return self.name
 
 
-class RecipeIngredient(models.Model):
-    '''
-    Модель для ингредиентов в рецептах, создающая
-    промежуточную таблице (many-to-many связь).
-    '''
-
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        related_name='recipe_ingredients',
-        verbose_name='Рецепт',
-    )
-    ingredient = models.ForeignKey(
-        Ingredient,
-        on_delete=models.CASCADE,
-        related_name='recipe_ingredients',
-        verbose_name='Ингредиент',
-    )
-    amount = models.PositiveSmallIntegerField(
-        verbose_name='Количество ингредиента',
-    )
-
-    class Meta:
-        verbose_name = 'Ингредиент рецепта'
-        verbose_name_plural = 'Ингредиенты рецепта'
-        ordering = ['id']
-
-    def __str__(self):
-        return self.ingredient.name
-
-
 class RecipeTag(models.Model):
     '''
     Модель для тэга рецепта, создающая
@@ -183,6 +152,41 @@ class RecipeTag(models.Model):
     
     def __str__(self):
         return self.tag.name
+
+
+class RecipeIngredient(models.Model):
+    '''
+    Модель для ингредиентов в рецептах, создающая
+    промежуточную таблице (many-to-many связь).
+    '''
+
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='recipe_ingredients',
+        verbose_name='Рецепт',
+    )
+    ingredient = models.ForeignKey(
+        Ingredient,
+        on_delete=models.CASCADE,
+        related_name='recipe_ingredients',
+        verbose_name='Ингредиент',
+    )
+    amount = models.PositiveSmallIntegerField(
+        verbose_name='Количество ингредиента',
+        validators=[
+            MinValueValidator(cnst.AMOUNT_RECIPE_INGREDIENT_MIN),
+            MaxValueValidator(cnst.AMOUNT_RECIPE_INGREDIENT_MAX),
+        ],
+    )
+
+    class Meta:
+        verbose_name = 'Ингредиент рецепта'
+        verbose_name_plural = 'Ингредиенты рецепта'
+        ordering = ['id']
+
+    def __str__(self):
+        return f'{self.ingredient.name} ({self.amount}) для рецепта {self.recipe.name}'
 
 
 class ShoppingCart(models.Model):
