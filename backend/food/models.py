@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 from tools import constants as cnst
@@ -56,7 +57,10 @@ class Ingredient(models.Model):
         ordering = ['name']
         constraints = [
             models.UniqueConstraint(
-                fields=['name', 'measurement_unit'],
+                fields=[
+                    'name', 
+                    'measurement_unit',
+                ],
                 name='uniqe_name_unit',
             )
         ]
@@ -85,7 +89,10 @@ class Recipe(models.Model):
         verbose_name='Пользователь',
     )
     image = models.ImageField(
-        verbose_name='Картинка для рецепта',
+        verbose_name='Ссылка для картинки рецепта на сайте',
+        blank=True,
+        null=True,
+        upload_to='recipes/'
     )
     tags = models.ManyToManyField(
         Tag,
@@ -100,6 +107,15 @@ class Recipe(models.Model):
     pub_date = models.DateTimeField(
         verbose_name='Дата публикации',
         auto_now_add=True,
+    )
+    cooking_time = models.PositiveSmallIntegerField(
+        verbose_name='Время приготовления (мин)',
+        validators=[
+            MinValueValidator(cnst.COOKING_TIME_MIN),
+            MaxValueValidator(cnst.COOKING_TIME_MAX),
+        ],
+        blank=True,
+        null=True,
     )
 
     class Meta:
