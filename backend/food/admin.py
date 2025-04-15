@@ -1,3 +1,46 @@
 from django.contrib import admin
 
-# Register your models here.
+from . import models
+
+
+@admin.register(models.Tag)
+class TagAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'name',
+        'color',
+    )
+    list_filter = ('slug',)
+
+
+@admin.register(models.Ingredient)
+class IngredientAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'name',
+        'measurement_unit',
+    )
+    list_filter = ('name',)
+
+
+class RecipeIngredientInline(admin.TabularInline):
+    model = models.RecipeIngredient
+
+
+@admin.register(models.Recipe)
+class RecipeAdmin(admin.ModelAdmin):
+    list_display = (
+        'id', 
+        'name', 
+        'author',
+    )
+    list_filter = (
+        'name',
+        'author',
+        'tags',
+    )
+    inlines = [RecipeIngredientInline]
+
+    @admin.display(description='Количество в избранных')
+    def in_favorites(self, obj):
+        return obj.favorites.count()
