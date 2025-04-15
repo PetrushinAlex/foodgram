@@ -1,4 +1,4 @@
-from ..food import models
+from food import models
 from rest_framework import viewsets
 
 from . import serializers
