@@ -4,14 +4,32 @@ from rest_framework import viewsets
 
 from . import serializers
 from food import models
-from tools import filters
+from tools import filters, paginators
 
 
 class RecipeViewSet(viewsets.GenericViewSet):
     '''
-    Получение списка рецептов.
+    Получение списка рецептов, добавление, апдейт и удаление рецептов.
     '''
     queryset = models.Recipe.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = filters.RecipeFilter
+    pagination_class = paginators.CustomRecipePaginator
+
+    def add_to(self, model, user, pk):
+        '''
+        Метод для добавления рецепта в модель.
+        '''
+        pass
+
+    def delete_from(self, model, user, pk):
+        '''
+        Метод для удаления рецепта из модели.
+        '''
+        pass
+
+    def get_permission(self):
+        pass
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
