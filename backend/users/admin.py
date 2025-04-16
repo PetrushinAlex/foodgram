@@ -26,3 +26,20 @@ class CustomUserAdmin(UserAdmin):
         'first_name',
         'last_name',
     )
+
+
+@admin.register(models.Sub)
+class SubAdmin(admin.ModelAdmin):
+    '''
+    Класс для регистрации модели подписчика с полями для поиска 
+    у автора и подписчика.
+    '''
+    list_display = (
+        'id',
+        'author',
+        'user',
+    )
+    search_fields = (
+        'author__username',
+        'user__username',
+    )

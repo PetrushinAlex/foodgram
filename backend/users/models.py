@@ -44,17 +44,17 @@ class Sub(models.Model):
     между моделями пользователей.
     '''
 
-    user = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        related_name='subscriber',
-        verbose_name='Подписчик',
-    )
     author = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
         related_name='subscription',
         verbose_name='Автор',
+    )
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='subscriber',
+        verbose_name='Подписчик',
     )
 
     class Meta:
