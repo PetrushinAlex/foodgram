@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import relations, serializers
 from drf_extra_fields.fields import Base64ImageField
 
-from ..food import models
+from food import models
 
 
 User = get_user_model()

@@ -44,3 +44,21 @@ class RecipeAdmin(admin.ModelAdmin):
     @admin.display(description='Количество в избранных')
     def in_favorites(self, obj):
         return obj.favorites.count()
+    
+
+@admin.register(models.ShoppingCart)
+class ShoppingCartAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'recipe',
+        'user',
+    )
+
+
+@admin.register(models.Favorite)
+class FavoriteAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'recipe',
+        'user',
+    )
