@@ -3,7 +3,7 @@ from rest_framework.pagination import PageNumberPagination
 from . import constants as cnst
 
 
-class CustomPaginator(PageNumberPagination):
+class CustomRecipePaginator(PageNumberPagination):
     '''
     Кастомный пагинатор, устанавливающий по определенное в константе 
     количество объектов на страницу и позволяющий переопределить 
