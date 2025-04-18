@@ -38,7 +38,7 @@ class RecipeViewSet(viewsets.GenericViewSet):
             user=user, 
             recipe=recipe,
         )
-        serializer = serializers.RecipeCreateUpdateSerializer(recipe)
+        serializer = serializers.RecipeSimpleSerializer(recipe)
         return Response(
             serializer.data, 
             status=status.HTTP_201_CREATED,
