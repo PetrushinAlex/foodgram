@@ -139,7 +139,7 @@ class RecipeViewSet(viewsets.GenericViewSet):
         Переопределяет пермишен для создания, апдейта 
         и удаления рецепта (create, update, destroy).
         '''
-        if self.action is 'create':
+        if self.action == 'create':
             return (IsAuthenticated(),)
         if self.action in ('destroy', 'update',):
             return (permissions.IsAuthorOrAdmin(),)
