@@ -92,3 +92,17 @@ class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Ingredient
         fields = ('id', 'amount',)
+
+
+class RecipeSimpleSerializer(serializers.ModelSerializer):
+    '''
+    Сериализатор для упрощенного представления рецептов.
+    '''
+    class Meta:
+        model = models.Recipe
+        fields = (
+            'id',
+            'name',
+            'cooking_time',
+            'image',
+        )
