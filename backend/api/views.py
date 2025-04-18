@@ -1,7 +1,9 @@
+from django.db.models import Sum
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 from rest_framework.response import Response
 
@@ -19,13 +21,13 @@ class RecipeViewSet(viewsets.GenericViewSet):
     filterset_class = filters.RecipeFilter
     pagination_class = paginators.CustomRecipePaginator
 
-    def add_to(self, model, user, pk):
+    def add_recipe_to(self, model, user, pk):
         '''
-        Метод для добавления рецепта в модель.
+        Метод для добавления рецепта в определенную модель.
         '''
         if model.objects.filter(user=user, recipe__id=pk).exists():
             return Response(
-                {"Ошибка": "Рецепт уже был добавлен"},
+                {'Ошибка': 'Рецепт уже добавлен'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         recipe = get_object_or_404(
@@ -42,16 +44,100 @@ class RecipeViewSet(viewsets.GenericViewSet):
             status=status.HTTP_201_CREATED,
         )
 
-    def delete_from(self, model, user, pk):
+    def remove_recipe_from(self, model, user, pk):
         '''
-        Метод для удаления рецепта из модели.
+        Метод для удаления рецепта из определенной модели.
         '''
-        pass
+        obj = model.objects.filter(
+            recipe__id=pk,
+            user=user,
+        )
+        if obj.exists():
+            obj.delete()
+            return Response(
+                status=status.HTTP_204_NO_CONTENT,
+            )
+        return Response(
+            {'Ошибка':'Рецепт уже удален или не существует'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    
+    @action(detail=True, methods=['post', 'delete'])
+    def shopping_cart(self, request, pk):
+        '''
+        Добавляет или удаляет рецепт из корзины покупок 
+        пользователя, используя ранее определенные методы.
+        '''
+        if request.method == 'POST':
+            return self.add_recipe_to(
+                models.ShoppingCart,
+                request.user,
+                pk
+            )
+        if request.method == 'DELETE':
+            return self.remove_recipe_from(
+                models.ShoppingCart,
+                request.user,
+                pk
+            )
+
+    def download_shopping_cart(self, request):
+        '''
+        Скачать список ингредиентов из списка покупок.
+        '''
+        user = request.user
+        if user.shopping_cart.exists() == False:
+            return Response(
+                {'Ошибка':'Корзина отсутствует'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        ingredients = (
+            models.RecipeIngredient.objects.filter(
+                recipe__shopping_cart__user=user
+            )
+            .values(
+                'ingredient__name', 
+                'ingredient__measurement_unit',
+            )
+            .order_by('ingredient__name')
+            .annotate(amount=Sum('amount'))
+        )
+        shopping_cart = f'Корзина {user}\n'
+        for ingr in ingredients:
+            shopping_cart += (
+                f'{ingr["ingredient__name"].capitalize()},'
+                f'{ingr["amount"]}'
+                f'{ingr["ingredient__measurement_unit"]}'
+            )
+        file_name = f'shopping_cart_of_{user}.txt'
+        response = HttpResponse(shopping_cart, content_type='text/plain')
+        response['Content-Disposition'] = f'attachment; filename={file_name}'
+
+        return response
+    
+    @action(detail=True, methods=['post', 'delete'])
+    def favorite(self, request, pk):
+        '''
+        Добавляет или удаляет рецепт из избранного у 
+        пользователя, используя ранее определенные методы.
+        '''
+        if request.method == 'POST':
+            return self.add_recipe_to(
+                models.Favorite,
+                request.user,
+                pk
+            )
+        if request.method == 'DELETE':
+            return self.remove_recipe_from(
+                models.Favorite,
+                request.user,
+                pk
+            )
 
     def get_permissions(self):
         '''
         Переопределяет пермишен для создания, апдейта 
-        и удаления рецепта.
+        и удаления рецепта (create, update, destroy).
         '''
         if self.action is 'create':
             return (IsAuthenticated(),)
