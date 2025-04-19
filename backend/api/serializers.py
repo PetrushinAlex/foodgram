@@ -3,6 +3,7 @@ from rest_framework import relations, serializers
 from drf_extra_fields.fields import Base64ImageField
 
 from food import models
+from users import serializers as userserializers
 
 
 User = get_user_model()
@@ -12,7 +13,6 @@ class TagSerializer(serializers.ModelSerializer):
     '''
     Сериализатор для тэгов на основе соответствующей модели.
     '''
-
     class Meta:
         model = models.Tag
         fields = '__all__'
@@ -22,7 +22,6 @@ class IngredientSerializer(serializers.ModelSerializer):
     '''
     Сериализатор для ингридиентов на основе соответствующей модели.
     '''
-
     class Meta:
         model = models.Ingredient
         fields = '__all__'
@@ -32,7 +31,6 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
     '''
     Сериализатор для создания/обновления рецепта (на основе модели рецепта).
     '''
-
     image = Base64ImageField()
     tags = relations.PrimaryKeyRelatedField(
         queryset=models.Tag.objects.all(),
@@ -47,8 +45,9 @@ class RecipeListSerializer(serializers.ModelSerializer):
     '''
     Сериализатор для получения списка рецептов.
     '''
-
-    author = ...
+    author = userserializers.CustomUserSerializer(
+        read_only=True,
+    )
     image = serializers.ReadOnlyField(
         source='image.url',
     )
@@ -57,18 +56,28 @@ class RecipeListSerializer(serializers.ModelSerializer):
     )
     ingredients = IngredientSerializer(
         many=True,
+        source='recipe_ingredients',
+        required=True,
     )
 
     class Meta:
         model = models.Recipe
-        fields = '__all__'
+        fields = (
+            'id',
+            'name',
+            'author',
+            'image',
+            'tags',
+            'ingredients',
+            'text',
+            'cooking_time',
+        )
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
     '''
     Сериализатор для ингридиентов под рецепты.
     '''
-
     id = serializers.ReadOnlyField(
         source='ingredient.id',
     )
@@ -85,7 +94,6 @@ class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
     '''
     Сериализатор для создания ингредиентов в рецептах.
     '''
-
     id = serializers.IntegerField()
     amount = serializers.IntegerField()
 
