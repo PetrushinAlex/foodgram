@@ -59,6 +59,7 @@ class RecipeListSerializer(serializers.ModelSerializer):
         source='recipe_ingredients',
         required=True,
     )
+    is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Recipe
@@ -72,6 +73,11 @@ class RecipeListSerializer(serializers.ModelSerializer):
             'text',
             'cooking_time',
         )
+    
+    def get_is_in_shopping_cart(self, obj):
+        user = self.context.get('request').user
+        if user.is_anonymous:
+            
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):

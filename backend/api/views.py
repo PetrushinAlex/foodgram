@@ -83,12 +83,13 @@ class RecipeViewSet(viewsets.GenericViewSet):
 
     def download_shopping_cart(self, request):
         '''
-        Скачать список ингредиентов из списка покупок.
+        Скачать список ингредиентов из списка покупок 
+        пользователя из запросов.
         '''
         user = request.user
         if user.shopping_cart.exists() == False:
             return Response(
-                {'Ошибка':'Корзина отсутствует'},
+                {'Ошибка':'Корзина не заполнена'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         ingredients = (
