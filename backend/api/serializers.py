@@ -15,7 +15,12 @@ class TagSerializer(serializers.ModelSerializer):
     '''
     class Meta:
         model = models.Tag
-        fields = '__all__'
+        fields = (
+            'id',
+            'name',
+            'color',
+            'slug',
+        )
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -24,7 +29,11 @@ class IngredientSerializer(serializers.ModelSerializer):
     '''
     class Meta:
         model = models.Ingredient
-        fields = '__all__'
+        fields = (
+            'id', 
+            'name',
+            'measurement_unit',
+        )
 
 
 class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
@@ -33,12 +42,13 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
     '''
     image = Base64ImageField()
     tags = relations.PrimaryKeyRelatedField(
-        queryset=models.Tag.objects.all(),
         many=True,
+        queryset=models.Tag.objects.all(),
     )
 
     class Meta:
         model = models.Recipe
+        fields = '__all__'
     
 
 class RecipeListSerializer(serializers.ModelSerializer):
@@ -105,7 +115,12 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.RecipeIngredient
-        fields = '__all__'
+        fields = (
+            'id', 
+            'name',
+            'amount',
+            'measurement_unit',
+        )
 
 
 class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
@@ -114,10 +129,17 @@ class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
     '''
     id = serializers.IntegerField()
     amount = serializers.IntegerField()
+    measurement_unit = serializers.ReadOnlyField(
+        source='ingredient.measurement_unit',
+    )
 
     class Meta:
         model = models.Ingredient
-        fields = ('id', 'amount',)
+        fields = (
+            'id',
+            'amount',
+            'measurement_unit',
+        )
 
 
 class RecipeSimpleSerializer(serializers.ModelSerializer):
