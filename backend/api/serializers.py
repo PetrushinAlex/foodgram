@@ -36,6 +36,60 @@ class IngredientSerializer(serializers.ModelSerializer):
         )
 
 
+class RecipeIngredientSerializer(serializers.ModelSerializer):
+    '''
+    Сериализатор для ингридиентов под рецепты.
+    '''
+    id = serializers.ReadOnlyField(
+        source='ingredient.id',
+    )
+    name = serializers.ReadOnlyField(
+        source='ingredient.name',
+    )
+    measurement_unit = serializers.ReadOnlyField(
+        source='ingredient.measurement_unit',
+    )
+
+    class Meta:
+        model = models.RecipeIngredient
+        fields = (
+            'id', 
+            'name',
+            'amount',
+            'measurement_unit',
+        )
+
+
+class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
+    '''
+    Сериализатор для создания ингредиентов в рецептах.
+    '''
+    id = serializers.IntegerField()
+    amount = serializers.IntegerField()
+
+    class Meta:
+        model = models.Ingredient
+        fields = (
+            'id',
+            'amount',
+            'measurement_unit',
+        )
+
+
+class RecipeSimpleSerializer(serializers.ModelSerializer):
+    '''
+    Сериализатор для упрощенного представления рецептов.
+    '''
+    class Meta:
+        model = models.Recipe
+        fields = (
+            'id',
+            'name',
+            'cooking_time',
+            'image',
+        )
+
+
 class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
     '''
     Сериализатор для создания/обновления рецепта (на основе модели рецепта).
@@ -44,6 +98,10 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
     tags = relations.PrimaryKeyRelatedField(
         many=True,
         queryset=models.Tag.objects.all(),
+    )
+    ingredients = ...
+    author = userserializers.CustomUserSerializer(
+        many=True,
     )
 
     class Meta:
@@ -100,57 +158,3 @@ class RecipeListSerializer(serializers.ModelSerializer):
                 recipe=obj
             ).exists()
         return False
-
-
-class RecipeIngredientSerializer(serializers.ModelSerializer):
-    '''
-    Сериализатор для ингридиентов под рецепты.
-    '''
-    id = serializers.ReadOnlyField(
-        source='ingredient.id',
-    )
-    name = serializers.ReadOnlyField(
-        source='ingredient.name',
-    )
-    measurement_unit = serializers.ReadOnlyField(
-        source='ingredient.measurement_unit',
-    )
-
-    class Meta:
-        model = models.RecipeIngredient
-        fields = (
-            'id', 
-            'name',
-            'amount',
-            'measurement_unit',
-        )
-
-
-class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
-    '''
-    Сериализатор для создания ингредиентов в рецептах.
-    '''
-    id = serializers.IntegerField()
-    amount = serializers.IntegerField()
-
-    class Meta:
-        model = models.Ingredient
-        fields = (
-            'id',
-            'amount',
-            'measurement_unit',
-        )
-
-
-class RecipeSimpleSerializer(serializers.ModelSerializer):
-    '''
-    Сериализатор для упрощенного представления рецептов.
-    '''
-    class Meta:
-        model = models.Recipe
-        fields = (
-            'id',
-            'name',
-            'cooking_time',
-            'image',
-        )
