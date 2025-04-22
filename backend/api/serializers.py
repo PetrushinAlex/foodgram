@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import relations, serializers
 from drf_extra_fields.fields import Base64ImageField
+from rest_framework.exceptions import ValidationError
 
 from food import models
 from users import serializers as userserializers
@@ -99,7 +100,10 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         many=True,
         queryset=models.Tag.objects.all(),
     )
-    ingredients = ...
+    ingredients = RecipeIngredientCreateSerializer(
+        many=True,
+        read_only=True,
+    )
     author = userserializers.CustomUserSerializer(
         many=True,
     )
@@ -107,6 +111,25 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Recipe
         fields = '__all__'
+    
+    def validate_tags(self, tag):
+        if not tag:
+            raise ValidationError(
+                'Добавьте тэг!'
+            )
+        return tag
+    
+    def add_ingredients(self, recipe, ingredients):
+        models.RecipeIngredient.objects.bulk_create(
+            [
+                models.RecipeIngredient(
+                    recipe=recipe,
+                    ingredient_id=ingredient.get('id'),
+                    amount=ingredient.get('amount'),
+                )
+                for ingredient in ingredients
+            ]
+        )
     
 
 class RecipeListSerializer(serializers.ModelSerializer):
