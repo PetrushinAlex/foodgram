@@ -131,6 +131,26 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
             ]
         )
     
+    def create(self, validated_data):
+        author = self.context.get('request').user
+        tags = validated_data.pop('tags')
+        ingredients = validated_data.pop('ingredients')
+        recipe = models.Recipe.objects.create(
+            author=author,
+            **validated_data,
+        )
+        recipe.tags.set(tags)
+        self.add_ingredients(
+            recipe=recipe,
+            ingredients=ingredients,
+        )
+        return recipe
+    
+
+    def update(self, instance, validated_data):
+        pass
+
+    
 
 class RecipeListSerializer(serializers.ModelSerializer):
     '''
