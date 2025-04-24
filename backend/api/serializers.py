@@ -148,7 +148,16 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
     
 
     def update(self, instance, validated_data):
-        pass
+        if 'tags' in validated_data:
+            instance.tags.set(validated_data.pop('tags'))
+        if 'ingredients' in validated_data:
+            ingredients = validated_data.pop('ingredients')
+            instance.ingredients.clear()
+            self.add_ingredients(
+                recipe=instance,
+                ingredients=ingredients,
+            )
+        return super().update(instance, validated_data,)
 
     
 
