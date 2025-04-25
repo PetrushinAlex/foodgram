@@ -113,6 +113,10 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         fields = '__all__'
     
     def validate_tags(self, tag):
+        '''
+        Валидация добавления тэгов 
+        (должен быть добавлен хотя бы один)
+        '''
         if not tag:
             raise ValidationError(
                 'Добавьте тэг!'
@@ -120,6 +124,10 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         return tag
     
     def add_ingredients(self, recipe, ingredients):
+        '''
+        Метод добавления ингредиентов. Используется bulk_create
+        для избежания отдельных запросов для каждого объекта.
+        '''
         models.RecipeIngredient.objects.bulk_create(
             [
                 models.RecipeIngredient(
@@ -132,6 +140,10 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         )
     
     def create(self, validated_data):
+        '''
+        Метод создания рецепта с добавлением
+        ингредиентов с помощью метода add_ingredients.
+        '''
         author = self.context.get('request').user
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
@@ -148,6 +160,10 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
     
 
     def update(self, instance, validated_data):
+        '''
+        Метод для обновления рецепта так же используя
+        метод add_ingredients для ингредиентов.
+        '''
         if 'tags' in validated_data:
             instance.tags.set(validated_data.pop('tags'))
         if 'ingredients' in validated_data:
