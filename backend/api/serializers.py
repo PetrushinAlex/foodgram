@@ -115,13 +115,30 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
     def validate_tags(self, tag):
         '''
         Валидация добавления тэгов 
-        (должен быть добавлен хотя бы один)
+        (должен быть добавлен хотя бы один).
         '''
         if not tag:
             raise ValidationError(
                 'Добавьте тэг!'
             )
         return tag
+    
+    def validate_ingredients(self, ingredient):
+        '''
+        Валидация добавления ингредиентов
+        (ингредиенты не должны повторяться,
+        также должен быть указан хотя бы один).
+        '''
+        if not ingredient:
+            raise ValidationError(
+                'Добавьте хотя бы один ингредиент!'
+            )
+        ingredients = [ingr['id'] for ingr in ingredient]
+        if len(set(ingredients)) != len(ingredients):
+            raise ValidationError(
+                'Не указывайте один и тот же ингредиент дважды.'
+            )
+        return ingredient
     
     def add_ingredients(self, recipe, ingredients):
         '''
