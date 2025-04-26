@@ -104,12 +104,21 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         many=True,
     )
     author = userserializers.CustomUserSerializer(
-        many=True,
+        read_only=True,
     )
 
     class Meta:
         model = models.Recipe
-        fields = '__all__'
+        fields = (
+            'id',
+            'name',
+            'author',
+            'image',
+            'tags',
+            'ingredients',
+            'text',
+            'cooking_time',
+        )
     
     def validate_tags(self, tags):
         '''
@@ -118,7 +127,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         '''
         if not tags:
             raise ValidationError(
-                'Добавьте тэг!'
+                'Добавьте хотя бы один тэг!'
             )
         return tags
     
@@ -128,14 +137,14 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         (ингредиенты не должны повторяться,
         также должен быть указан хотя бы один).
         '''
-        if not ingredients:
-            raise ValidationError(
-                'Добавьте хотя бы один ингредиент!'
-            )
         ingredients_array = [ingr['id'] for ingr in ingredients]
         if len(set(ingredients_array)) != len(ingredients_array):
             raise ValidationError(
                 'Не указывайте один и тот же ингредиент дважды.'
+            )
+        if not ingredients:
+            raise ValidationError(
+                'Добавьте хотя бы один ингредиент!'
             )
         return ingredients
     
@@ -189,7 +198,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
                 recipe=instance,
                 ingredients=ingredients,
             )
-        return super().update(instance, validated_data,)
+        return super().update(instance, validated_data)
 
     
 
