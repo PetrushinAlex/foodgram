@@ -237,6 +237,11 @@ class RecipeListSerializer(serializers.ModelSerializer):
         )
     
     def get_is_in_shopping_cart(self, obj):
+        '''
+        Метод, позволяющий получить информацию о рецепте
+        в корзине пользователя.
+        Проверяет, анонимен ли пользователь.
+        '''
         user = self.context.get('request').user
         if not user.is_anonymous:
             return user.shopping_cart.filter(
@@ -245,6 +250,11 @@ class RecipeListSerializer(serializers.ModelSerializer):
         return False
     
     def get_is_in_favorite(self, obj):
+        '''
+        Метод, позволяющий получить информацию о рецепте
+        в избранном у пользователя.
+        Проверяет, анонимен ли пользователь.
+        '''
         user = self.context.get('request').user
         if not user.is_anonymous:
             return user.favorite.filter(
