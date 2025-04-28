@@ -10,7 +10,12 @@ User = get_user_model()
 
 class Tag(models.Model):
     '''
-    Модель для тэгов
+    Модель для тэгов.
+    Описаны поля:
+    name - название тэга (str);
+    color - цветовой код (HEX) (str);
+    slug - название слага (str).
+    В Meta классе по умолчанию сортировка по id.
     '''
 
     name = models.CharField(
@@ -40,6 +45,12 @@ class Tag(models.Model):
 class Ingredient(models.Model):
     '''
     Модель для ингредиентов.
+    Описаны поля:
+    name - название ингредиента (str);
+    measurement_unit - единица измерения (str).
+    На уровне базы данных по умолчанию сортировка по названию.
+    Также определена уникальная комбинация названия реагента
+    и единицы его измерения.
     '''
     name = models.CharField(
         max_length=cnst.MAX_LENGHT_NAME,
@@ -72,6 +83,18 @@ class Ingredient(models.Model):
 class Recipe(models.Model):
     '''
     Модель для рецептов.
+    Описаны поля:
+    name - название рецепта (str);
+    text - описание рецепта (str);
+    author - автор рецепта, это поле связано 
+             с актуальной моделью пользователя;
+    image - картинка для рецепта (img);
+    tags - тэги к рецепту (many-to-many с моделью Tag);
+    ingredients - ингредиенты к рецепту (many-to-many 
+                  с моделью Ingredient);
+    pub_date - автоматически добавляющаяся дата публикации;
+    cooking_time - время приготовления с указанием границ (int).
+    На уровне базы данных по умолчанию сортировка по названию.
     '''
 
     name = models.CharField(
