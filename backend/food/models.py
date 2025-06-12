@@ -136,7 +136,6 @@ class Recipe(models.Model):
         verbose_name='Время приготовления (мин)',
         validators=[
             MinValueValidator(cnst.COOKING_TIME_MIN),
-            MaxValueValidator(cnst.COOKING_TIME_MAX),
         ],
         blank=True,
         null=True,
@@ -200,7 +199,6 @@ class RecipeIngredient(models.Model):
         verbose_name='Количество ингредиента',
         validators=[
             MinValueValidator(cnst.AMOUNT_RECIPE_INGREDIENT_MIN),
-            MaxValueValidator(cnst.AMOUNT_RECIPE_INGREDIENT_MAX),
         ],
     )
 
