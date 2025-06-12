@@ -115,7 +115,7 @@ class Recipe(models.Model):
         verbose_name='Ссылка для картинки рецепта на сайте',
         blank=True,
         null=True,
-        upload_to='recipes/'
+        upload_to='recipes/',
     )
     tags = models.ManyToManyField(
         Tag,
@@ -136,7 +136,6 @@ class Recipe(models.Model):
         verbose_name='Время приготовления (мин)',
         validators=[
             MinValueValidator(cnst.COOKING_TIME_MIN),
-            MaxValueValidator(cnst.COOKING_TIME_MAX),
         ],
         blank=True,
         null=True,
