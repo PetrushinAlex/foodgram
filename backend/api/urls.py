@@ -23,6 +23,14 @@ router_v1.register(
     basename='ingredients'
 )
 
+router_v1.register(
+    'users',
+    views.UserViewSet,
+    basename='users'
+)
+
 urlpatterns = [
-    path('', include(router_v1.urls))
+    path('', include(router_v1.urls)),
+    path('auth/', include('djoser.urls.authtoken')),
 ]
+

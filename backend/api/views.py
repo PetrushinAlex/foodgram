@@ -2,14 +2,88 @@ from django.db.models import Sum
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from rest_framework import status, viewsets
+from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 from rest_framework.response import Response
+from django.contrib.auth import get_user_model
+from djoser.views import UserViewSet
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.permissions import (
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly
+)
 
-from . import serializers
+from . import serializers as myserializers
 from food import models
 from tools import filters, paginators, permissions
+
+
+User = get_user_model()
+
+
+class UserViewSet(UserViewSet):
+    '''
+    Кастомное представление для пользователей.
+    '''
+
+    queryset = User.objects.all()
+    serializer_class = myserializers.UserSerializer
+    pagination_class = paginators.CustomPaginator
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+
+    @action(
+        detail=True,
+        methods=['post', 'delete'],
+        permission_classes=[IsAuthenticated],
+    )
+    def subscribe(self, request, **kwargs):
+        user = request.user
+        author = get_object_or_404(
+            User,
+            id=self.kwargs.get('id'),
+        )
+
+        if request.method == 'POST':
+            serializer = myserializers.SubscribeSerializer(
+                author,
+                data=request.data,
+                context={'request': request},
+            )
+            serializer.is_valid(raise_exception=True)
+            models.Sub.objects.create(
+                user=user,
+                author=author,
+            )
+            return Response(
+                serializer.data,
+                status=status.HTTP_201_CREATED,
+            )
+
+        subscription = get_object_or_404(
+            models.Sub, 
+            user=user, 
+            author=author,
+        )
+        subscription.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    @action(
+        detail=False,
+        permission_classes=[IsAuthenticated],
+    )
+    def subscriptions(self, request):
+        queryset = User.objects.filter(
+            subscription__user=request.user,
+        )
+        pages = self.paginate_queryset(queryset)
+        serializer = myserializers.SubscribeSerializer(
+            pages, 
+            many=True, 
+            context={"request": request},
+        )
+        return self.get_paginated_response(serializer.data)
 
 
 class RecipeViewSet(viewsets.GenericViewSet):
@@ -38,7 +112,7 @@ class RecipeViewSet(viewsets.GenericViewSet):
             user=user, 
             recipe=recipe,
         )
-        serializer = serializers.RecipeSimpleSerializer(recipe)
+        serializer = myserializers.RecipeSimpleSerializer(recipe)
         return Response(
             serializer.data, 
             status=status.HTTP_201_CREATED,
@@ -151,9 +225,9 @@ class RecipeViewSet(viewsets.GenericViewSet):
         на "безопасные" методы и остальные.
         '''
         serializer_class = (
-            serializers.RecipeListSerializer
+            myserializers.RecipeListSerializer
             if self.request.method in SAFE_METHODS
-            else serializers.RecipeCreateUpdateSerializer
+            else myserializers.RecipeCreateUpdateSerializer
         )
         return serializer_class
 
@@ -164,7 +238,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
     Создание и редактирование только в админке.
     '''
     queryset = models.Tag.objects.all()
-    serializer_class = serializers.TagSerializer
+    serializer_class = myserializers.TagSerializer
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
@@ -173,6 +247,6 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     Создание и редактирование только в админке.
     '''
     queryset = models.Ingredient.objects.all()
-    serializer_class = serializers.IngredientSerializer
+    serializer_class = myserializers.IngredientSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = filters.IngredientFilter
