@@ -2,12 +2,109 @@ from django.contrib.auth import get_user_model
 from rest_framework import relations, serializers
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework.exceptions import ValidationError
+from djoser.serializers import UserCreateSerializer, UserSerializer
+from rest_framework.fields import SerializerMethodField
 
 from food import models
-from users import serializers as userserializers
 
 
 User = get_user_model()
+
+
+class UserSerializer(UserSerializer):
+    '''
+    Сериализатор для кастомного пользователя с дополнительной
+    информацией (о подписке).
+    '''
+
+    is_subscribed = SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+        )
+
+    def get_is_subscribed(self, obj):
+        user = self.context.get('request').user
+        if user.is_anonymous:
+            return False
+        return user.subscriber.filter(author=obj).exists()
+
+
+class UserCreateSerializer(UserCreateSerializer):
+    """
+    Сериализатор для создания кастомного пользователя.
+    """
+
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'password',
+        )
+
+
+class SubscribeSerializer(UserSerializer):
+    '''
+    Сериализатор на основе сериализатора кастомного пользователя
+    с информацией о подписках.
+    '''
+
+    recipes = serializers.SerializerMethodField()
+    recipe_quantity = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+            'recipes',
+            'recipe_quantity',
+        )
+        read_only_fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+        )
+
+        def get_is_subscribed(self, obj):
+            user = self.context['request'].user
+            return (
+                user.is_authenticated
+                and user.subscriber.filter(author=obj.author).exists()
+            )
+        
+        def get_recipes(self, obj):
+            request = self.context.get('request')
+            recipes_limit = request.query_params.get('recipes_limit')
+            if recipes_limit is not None:
+                try:
+                    recipes_limit = int(recipes_limit)
+                except ValueError:
+                    recipes_limit = None
+            recipes_limit_value = recipes_limit or settings.DEFAULT_PAGE_SIZE
+            recipes = obj.author.recipes.all()[:recipes_limit_value]
+
+            return RecipeListSerializer(
+                recipes,
+                many=True,
+                context=self.context
+            ).data
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -103,7 +200,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
     ingredients = RecipeIngredientCreateSerializer(
         many=True,
     )
-    author = userserializers.CustomUserSerializer(
+    author = UserSerializer(
         read_only=True,
     )
 
@@ -206,7 +303,7 @@ class RecipeListSerializer(serializers.ModelSerializer):
     '''
     Сериализатор для получения списка рецептов.
     '''
-    author = userserializers.CustomUserSerializer(
+    author = UserSerializer(
         read_only=True,
     )
     image = serializers.ReadOnlyField(
