@@ -74,12 +74,11 @@ class RecipeViewSet(viewsets.GenericViewSet):
                 request.user,
                 pk
             )
-        if request.method == 'DELETE':
-            return self.remove_recipe_from(
-                models.ShoppingCart,
-                request.user,
-                pk
-            )
+        return self.remove_recipe_from(
+            models.ShoppingCart,
+            request.user,
+            pk
+        )
 
     def download_shopping_cart(self, request):
         '''
