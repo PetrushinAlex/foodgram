@@ -6,6 +6,7 @@ from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework.fields import SerializerMethodField
 
 from food import models
+from tools import constants
 
 
 User = get_user_model()
@@ -97,7 +98,7 @@ class SubscribeSerializer(UserSerializer):
                     recipes_limit = int(recipes_limit)
                 except ValueError:
                     recipes_limit = None
-            recipes_limit_value = recipes_limit or settings.DEFAULT_PAGE_SIZE
+            recipes_limit_value = recipes_limit or constants.DEFAULT_PAGE_SIZE
             recipes = obj.author.recipes.all()[:recipes_limit_value]
 
             return RecipeListSerializer(
