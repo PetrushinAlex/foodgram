@@ -199,7 +199,6 @@ class RecipeIngredient(models.Model):
         verbose_name='Количество ингредиента',
         validators=[
             MinValueValidator(cnst.AMOUNT_RECIPE_INGREDIENT_MIN),
-            MaxValueValidator(cnst.AMOUNT_RECIPE_INGREDIENT_MAX),
         ],
     )
 
