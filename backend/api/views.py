@@ -7,9 +7,10 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
-from djoser.views import UserViewSet
+from djoser.views import UserViewSet as DjoserUserViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.core.files.storage import default_storage
 from rest_framework.permissions import (
     IsAuthenticated,
     IsAuthenticatedOrReadOnly
