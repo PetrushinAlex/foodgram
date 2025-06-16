@@ -298,6 +298,9 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
             )
         return super().update(instance, validated_data)
 
+
+class AvatarSerializer(serializers.Serializer):
+    avatar = Base64ImageField(required=True)
     
 
 class RecipeListSerializer(serializers.ModelSerializer):
