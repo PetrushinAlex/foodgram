@@ -7,9 +7,10 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
-from djoser.views import UserViewSet
+from djoser.views import UserViewSet as DjoserUserViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.core.files.storage import default_storage
 from rest_framework.permissions import (
     IsAuthenticated,
     IsAuthenticatedOrReadOnly
@@ -23,15 +24,60 @@ from tools import filters, paginators, permissions
 User = get_user_model()
 
 
-class UserViewSet(UserViewSet):
+class UserViewSet(DjoserUserViewSet):
     '''
     Кастомное представление для пользователей.
     '''
 
-    queryset = User.objects.all()
-    serializer_class = myserializers.UserSerializer
-    pagination_class = paginators.CustomPaginator
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    pagination_class = paginators.Paginator
+
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [permissions.AllowAny()]
+        return super().get_permissions()
+
+    def get_serializer_class(self):
+        if self.action in ['list', 'retrieve']:
+            return myserializers.UserSerializer
+        return super().get_serializer_class()
+
+    @action(
+        detail=False,
+        methods=['get'],
+        url_path='me',
+        permission_classes=[IsAuthenticated],
+    )
+    def me(self, request, *args, **kwargs):
+        serializer = myserializers.UserSerializer(
+            request.user, context={'request': request}
+        )
+        return Response(serializer.data)
+
+    @action(
+        detail=False,
+        methods=['put', 'delete'],
+        permission_classes=[IsAuthenticated],
+        url_path='me/avatar',
+    )
+    def avatar(self, request, *args, **kwargs):
+        user = request.user
+
+        if request.method == 'DELETE':
+            if user.avatar:
+                if default_storage.exists(user.avatar.name):
+                    default_storage.delete(user.avatar.name)
+                user.avatar = None
+                user.save()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        serializer = myserializers.AvatarSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        avatar = serializer.validated_data['avatar']
+        user.avatar = avatar
+        user.save()
+        return Response(
+            {'avatar': user.avatar.url}, status=status.HTTP_200_OK
+        )
 
     @action(
         detail=True,
