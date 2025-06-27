@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import relations, serializers
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework.exceptions import ValidationError
-from djoser.serializers import UserCreateSerializer, UserSerializer
+from djoser.serializers import UserCreateSerializer as DjoserUserCreateSerializer, UserSerializer as DjoserUserSerializer
 from rest_framework.fields import SerializerMethodField
 
 from food import models
@@ -12,7 +12,7 @@ from tools import constants
 User = get_user_model()
 
 
-class UserSerializer(UserSerializer):
+class UserSerializer(DjoserUserSerializer):
     '''
     Сериализатор для кастомного пользователя с дополнительной
     информацией (о подписке).
@@ -38,7 +38,7 @@ class UserSerializer(UserSerializer):
         return user.subscriber.filter(author=obj).exists()
 
 
-class UserCreateSerializer(UserCreateSerializer):
+class UserCreateSerializer(DjoserUserCreateSerializer):
     """
     Сериализатор для создания кастомного пользователя.
     """
