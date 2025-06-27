@@ -105,7 +105,7 @@ class RecipeViewSet(viewsets.GenericViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         recipe = get_object_or_404(
-            models.Recipe, 
+            models.Recipe,
             id=pk,
         )
         model.objects.create(
