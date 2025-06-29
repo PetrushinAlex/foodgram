@@ -1,4 +1,3 @@
-from rest_framework import permissions
 from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 
 
@@ -16,7 +15,7 @@ class IsAuthorOrReadOnlyPermission(IsAuthenticated):
         '''
 
         return (
-            request.method in SAFE_METHODS 
+            request.method in SAFE_METHODS
             or request.user.is_authenticated
         )
 
@@ -26,6 +25,6 @@ class IsAuthorOrReadOnlyPermission(IsAuthenticated):
         '''
 
         return (
-            request.method in SAFE_METHODS or
-            obj.author == request.user
+            request.method in SAFE_METHODS
+            or obj.author == request.user
         )

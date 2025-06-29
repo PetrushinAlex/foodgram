@@ -8,18 +8,18 @@ app_name = 'api'
 router_v1 = routers.DefaultRouter()
 
 router_v1.register(
-    'recipes', 
-    views.RecipeViewSet, 
+    'recipes',
+    views.RecipeViewSet,
     basename='recipes'
 )
 router_v1.register(
-    'tags', 
-    views.TagViewSet, 
+    'tags',
+    views.TagViewSet,
     basename='tags'
 )
 router_v1.register(
-    'ingredients', 
-    views.IngredientViewSet, 
+    'ingredients',
+    views.IngredientViewSet,
     basename='ingredients'
 )
 

@@ -69,7 +69,7 @@ class Ingredient(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=[
-                    'name', 
+                    'name',
                     'measurement_unit',
                 ],
                 name='uniqe_name_unit',
@@ -86,11 +86,11 @@ class Recipe(models.Model):
     Описаны поля:
     name - название рецепта (str);
     text - описание рецепта (str);
-    author - автор рецепта, это поле связано 
+    author - автор рецепта, это поле связано
              с актуальной моделью пользователя;
     image - картинка для рецепта (img);
     tags - тэги к рецепту (many-to-many с моделью Tag);
-    ingredients - ингредиенты к рецепту (many-to-many 
+    ingredients - ингредиенты к рецепту (many-to-many
                   с моделью Ingredient);
     pub_date - автоматически добавляющаяся дата публикации;
     cooking_time - время приготовления с указанием границ (int).
@@ -145,7 +145,7 @@ class Recipe(models.Model):
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
         ordering = ['name']
-    
+
     def __str__(self):
         return self.name
 
@@ -181,12 +181,15 @@ class RecipeIngredient(models.Model):
         ordering = ['id']
 
     def __str__(self):
-        return f'{self.ingredient.name} ({self.amount}) для рецепта {self.recipe.name}'
+        return (
+            f'{self.ingredient.name} ({self.amount})'
+            f'для рецепта {self.recipe.name}'
+        )
 
 
 class ShoppingCart(models.Model):
     '''
-    Модель для корзины рецептов конкретного юзера, создающая 
+    Модель для корзины рецептов конкретного юзера, создающая
     промежуточную таблицу между соответствующими моделями (many-to-many связь).
     '''
 
@@ -210,10 +213,10 @@ class ShoppingCart(models.Model):
 
 class Favorite(models.Model):
     '''
-    Модель для любимых рецептов конкретного юзера, создающая 
+    Модель для любимых рецептов конкретного юзера, создающая
     промежуточную таблицу между соответствующими моделями (many-to-many связь).
     '''
-    
+
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
