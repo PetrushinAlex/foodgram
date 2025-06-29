@@ -15,7 +15,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', get_random_secret_key())
 
 DEBUG = os.getenv('DEBUG', default=False) == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', default='127.0.0.1, localhost').split(', ')
+ALLOWED_HOSTS = ['84.201.176.249', '127.0.0.1', 'localhost', 'foodgrammick.hopto.org']
 
 AUTH_USER_MODEL = 'users.CustomUser'
 
