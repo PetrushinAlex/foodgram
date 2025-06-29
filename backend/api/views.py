@@ -8,6 +8,7 @@ from django.urls import reverse
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse, FileResponse
 from django.shortcuts import get_object_or_404
+from django.core.files.storage import default_storage
 from docx import Document
 from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
@@ -17,7 +18,6 @@ from django.contrib.auth import get_user_model
 from djoser.views import UserViewSet as DjoserUserViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.core.files.storage import default_storage
 from hashids import Hashids
 from rest_framework import permissions
 
