@@ -20,19 +20,19 @@ User = get_user_model()
 
 
 class FavoriteRecipeSerializer(serializers.ModelSerializer):
-    """
+    '''
     Преобразует данные о избранных рецептах.
     Возвращает сокращенную информацию о рецепте.
-    """
+    '''
 
     class Meta:
         model = Recipe
         fields = ('id',)
 
     def to_representation(self, instance):
-        """
+        '''
         Преобразует ID рецепта в полные данные о нем.
-        """
+        '''
 
         representation = super().to_representation(instance)
         favorite = get_object_or_404(
@@ -43,10 +43,10 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
-    """
+    '''
     Обрабатывает операции с корзиной покупок.
     Управляет добавлением и удалением рецептов.
-    """
+    '''
 
     class Meta:
         model = ShoppingCart
@@ -54,9 +54,9 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
         read_only_fields = ['user']
 
     def validate(self, data):
-        """
+        '''
         Проверяет, что рецепт еще не добавлен в корзину.
-        """
+        '''
 
         request = self.context['request']
 
@@ -69,18 +69,18 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
         return data
 
     def to_representation(self, instance):
-        """
+        '''
         Возвращает упрощенные данные о рецепте.
-        """
+        '''
 
         return RecipeSimpleSerializer(instance.recipe).data
 
 
 class UserSerializer(DjoserUserSerializer):
-    """
+    '''
     Расширенный сериализатор пользователей.
     Добавляет информацию о подписках и аватаре.
-    """
+    '''
 
     is_subscribed = SerializerMethodField()
     avatar = Base64ImageField(
@@ -105,9 +105,9 @@ class UserSerializer(DjoserUserSerializer):
         )
 
     def get_is_subscribed(self, obj):
-        """
+        '''
         Определяет, подписан ли текущий пользователь на этого автора.
-        """
+        '''
 
         request = self.context.get('request')
         user = request.user
@@ -119,10 +119,10 @@ class UserSerializer(DjoserUserSerializer):
 
 
 class SubscribeSerializer(serializers.ModelSerializer):
-    """
+    '''
     Формирует данные о подписках пользователя.
     Включает количество рецептов и их сокращенный список.
-    """
+    '''
 
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.ReadOnlyField(source='recipes.count')
@@ -148,9 +148,9 @@ class SubscribeSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
     def get_is_subscribed(self, obj):
-        """
+        '''
         Проверяет наличие активной подписки.
-        """
+        '''
 
         request = self.context.get('request')
         user = request.user
@@ -161,10 +161,10 @@ class SubscribeSerializer(serializers.ModelSerializer):
         return False
 
     def get_recipes(self, obj):
-        """
+        '''
         Возвращает ограниченное количество рецептов автора.
         Поддерживает параметр recipes_limit для ограничения вывода.
-        """
+        '''
 
         request = self.context.get('request')
         recipes = obj.recipes.all()
@@ -181,9 +181,9 @@ class SubscribeSerializer(serializers.ModelSerializer):
 
 
 class TagSerializer(serializers.ModelSerializer):
-    """
+    '''
     Преобразует данные о кулинарных тегах.
-    """
+    '''
 
     class Meta:
         model = Tag
@@ -195,10 +195,10 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class IngredientSerializer(serializers.ModelSerializer):
-    """
+    '''
     Обрабатывает информацию об ингредиентах.
     Включает единицы измерения для каждого ингредиента.
-    """
+    '''
 
     class Meta:
         model = Ingredient
@@ -210,10 +210,10 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
-    """
+    '''
     Связывает рецепты с ингредиентами.
     Указывает количество ингредиентов для каждого рецепта.
-    """
+    '''
 
     id = serializers.PrimaryKeyRelatedField(
         queryset=Ingredient.objects.all(),
@@ -244,10 +244,10 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
 
 class RecipeSimpleSerializer(serializers.ModelSerializer):
-    """
+    '''
     Сокращенная версия данных о рецепте.
     Используется для вложенных представлений.
-    """
+    '''
 
     class Meta:
         model = Recipe
@@ -266,10 +266,10 @@ class RecipeSimpleSerializer(serializers.ModelSerializer):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-    """
+    '''
     Основной сериализатор рецептов.
     Обеспечивает полный цикл работы с рецептами.
-    """
+    '''
 
     author = UserSerializer(
         read_only=True
@@ -321,10 +321,10 @@ class RecipeSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, data):
-        """
+        '''
         Комплексная проверка данных рецепта.
         Контролирует теги, ингредиенты, время приготовления и изображение.
-        """
+        '''
 
         t = data.get('tags', [])
         ingredients = data.get('recipe_ingredients', [])
@@ -399,9 +399,9 @@ class RecipeSerializer(serializers.ModelSerializer):
         return data
 
     def get_is_favorited(self, obj):
-        """
+        '''
         Проверяет, находится ли рецепт в избранном.
-        """
+        '''
 
         request = self.context.get('request')
         if request and request.user.is_authenticated:
@@ -409,9 +409,9 @@ class RecipeSerializer(serializers.ModelSerializer):
         return False
 
     def get_is_in_shopping_cart(self, obj):
-        """
+        '''
         Определяет, добавлен ли рецепт в корзину.
-        """
+        '''
 
         request = self.context.get('request')
         if request and request.user.is_authenticated:
@@ -421,9 +421,9 @@ class RecipeSerializer(serializers.ModelSerializer):
         return False
 
     def create(self, validated_data):
-        """
+        '''
         Создает новый рецепт с указанными тегами и ингредиентами.
-        """
+        '''
 
         i_data = validated_data.pop('recipe_ingredients', [])
         t_data = validated_data.pop('tags', [])
@@ -440,10 +440,10 @@ class RecipeSerializer(serializers.ModelSerializer):
         return recipe
 
     def ing_up_and_cr(self, recipe, ingredients_data):
-        """
+        '''
         Внутренний метод для обработки ингредиентов.
         Создает связи между рецептом и ингредиентами.
-        """
+        '''
 
         recipe_ingredients = [
             RecipeIngredient(
@@ -457,10 +457,10 @@ class RecipeSerializer(serializers.ModelSerializer):
         return recipe_ingredients
 
     def update(self, instance, validated_data):
-        """
+        '''
         Обновляет существующий рецепт.
         Полностью заменяет теги и ингредиенты.
-        """
+        '''
 
         if 'image' not in validated_data:
             validated_data['image'] = instance.image
@@ -480,10 +480,10 @@ class RecipeSerializer(serializers.ModelSerializer):
         return instance
 
     def to_representation(self, instance):
-        """
+        '''
         Формирует итоговое представление рецепта.
         Добавляет полные данные о тегах.
-        """
+        '''
 
         rep = super().to_representation(instance)
         rep['tags'] = TagSerializer(
@@ -494,7 +494,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 
 class AvatarSerializer(serializers.Serializer):
-    """
+    '''
     Обрабатывает загрузку аватара пользователя.
-    """
+    '''
     avatar = Base64ImageField(required=True)

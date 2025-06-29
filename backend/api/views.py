@@ -41,7 +41,7 @@ class UserViewSet(DjoserUserViewSet):
 
         if self.action == 'list':
             return myserializers.UserSerializer
-        elif self.action == "retrieve":
+        elif self.action == 'retrieve':
             return myserializers.UserSerializer
         return super().get_serializer_class()
 
@@ -49,34 +49,34 @@ class UserViewSet(DjoserUserViewSet):
 
         if self.action == 'list':
             return [permissions.AllowAny()]
-        elif self.action == "retrieve":
+        elif self.action == 'retrieve':
             return [permissions.AllowAny()]
         return super().get_permissions()
 
     @action(
-        methods=["get"],
+        methods=['get'],
         detail=False,
-        url_path="me",
+        url_path='me',
         permission_classes=[IsAuthenticated],
     )
     def me(self, request, *args, **kwargs):
 
         serializer = myserializers.UserSerializer(
             request.user,
-            context={"request": request}
+            context={'request': request}
         )
         date_of_serializer = serializer.data
         return Response(date_of_serializer)
 
     @action(
         detail=False,
-        methods=["put", "delete"],
+        methods=['put', 'delete'],
         permission_classes=[IsAuthenticated],
-        url_path="me/avatar",
+        url_path='me/avatar',
     )
     def avatar(self, request, *args, **kwargs):
 
-        if request.method == "DELETE":
+        if request.method == 'DELETE':
             if request.user.avatar:
                 if default_storage.exists(request.user.avatar.name):
                     default_storage.delete(request.user.avatar.name)
@@ -88,10 +88,10 @@ class UserViewSet(DjoserUserViewSet):
                 data=request.data
             )
             serializer.is_valid(raise_exception=True)
-            request.user.avatar = serializer.validated_data["avatar"]
+            request.user.avatar = serializer.validated_data['avatar']
             request.user.save()
 
-            response_data = {"avatar": request.user.avatar.url}
+            response_data = {'avatar': request.user.avatar.url}
             return Response(
                 response_data,
                 status=status.HTTP_200_OK,
@@ -99,9 +99,9 @@ class UserViewSet(DjoserUserViewSet):
 
     @action(
         detail=True,
-        methods=["post", "delete"],
+        methods=['post', 'delete'],
         permission_classes=[permissions.IsAuthenticated],
-        url_path="subscribe",
+        url_path='subscribe',
     )
     def subscribe(self, request, *args, **kwargs):
 
@@ -112,7 +112,9 @@ class UserViewSet(DjoserUserViewSet):
         return self._delete_subscription(user, author)
 
     def _create_subscription(self, user, author, request):
-        """Создает подписку на пользователя"""
+        '''
+        Создает подписку на пользователя
+        '''
 
         if user == author:
             return Response(
@@ -133,7 +135,9 @@ class UserViewSet(DjoserUserViewSet):
         return Response(data, status=status.HTTP_201_CREATED)
 
     def _delete_subscription(self, user, author):
-        """Удаляет подписку на пользователя"""
+        '''
+        Удаляет подписку на пользователя.
+        '''
 
         subscription = Sub.objects.filter(
             user=user, author=author
@@ -148,9 +152,9 @@ class UserViewSet(DjoserUserViewSet):
 
     @action(
         detail=False,
-        methods=["get"],
+        methods=['get'],
         permission_classes=[permissions.IsAuthenticated],
-        url_path="subscriptions",
+        url_path='subscriptions',
     )
     def subscriptions(self, request, *args, **kwargs):
 
@@ -158,7 +162,7 @@ class UserViewSet(DjoserUserViewSet):
         queryset = User.objects.filter(users_subscribers__user=user)
         pages = self.paginate_queryset(queryset)
         serializer = myserializers.SubscribeSerializer(
-            pages, many=True, context={"request": request}
+            pages, many=True, context={'request': request}
         )
         return self.get_paginated_response(serializer.data)
 
@@ -176,35 +180,39 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filterset_class = tools_filters.RecipeFilter
 
     def perform_create(self, serializer):
-        """Автоматически устанавливает автора при создании рецепта."""
+        '''
+        Автоматически устанавливает автора при создании рецепта.
+        '''
 
         serializer.save(author=self.request.user)
 
     @action(
         detail=True,
-        methods=["get"],
-        url_path="get-link"
+        methods=['get'],
+        url_path='get-link'
     )
     def link(self, request, pk=None):
-        """
+        '''
         Генерирует короткую ссылку на рецепт.
         Возвращает URL для перенаправления к рецепту.
-        """
+        '''
 
         get_object_or_404(Recipe, id=pk)
         short_url = request.build_absolute_uri(
             reverse('redirect_recipe', kwargs={'pk': pk})
         )
-        return Response({"short-link": short_url})
+        return Response({'short-link': short_url})
 
     @action(
         detail=True,
-        methods=["post"],
-        url_name="shopping_cart",
+        methods=['post'],
+        url_name='shopping_cart',
         permission_classes=[permissions.IsAuthenticated],
     )
     def shopping_cart(self, request, pk=None):
-        """Добавляет рецепт в список покупок текущего пользователя."""
+        '''
+        Добавляет рецепт в список покупок текущего пользователя.
+        '''
 
         recipe = get_object_or_404(Recipe, id=pk)
         user = request.user
@@ -214,7 +222,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
         if not created:
             return Response(
-                {"errors": f"Рецепт '{recipe.name}' уже в списке покупок"},
+                {'errors': f"Рецепт '{recipe.name}' уже в списке покупок"},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -226,7 +234,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @shopping_cart.mapping.delete
     def remove_from_shopping_cart(self, request, pk=None):
-        """Удаляет рецепт из списка покупок текущего пользователя."""
+        '''
+        Удаляет рецепт из списка покупок текущего пользователя.
+        '''
 
         recipe = get_object_or_404(Recipe, pk=pk)
         cart_relation = ShoppingCart.objects.filter(
@@ -243,12 +253,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=True,
-        methods=["post"],
-        url_name="favorite",
+        methods=['post'],
+        url_name='favorite',
         permission_classes=[permissions.IsAuthenticated],
     )
     def favorite(self, request, pk=None):
-        """Добавляет рецепт в избранное для текущего пользователя."""
+        '''
+        Добавляет рецепт в избранное для текущего пользователя.
+        '''
 
         recipe = get_object_or_404(Recipe, id=pk)
 
@@ -259,7 +271,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
         if not created:
             return Response(
-                {"errors": f"Рецепт '{recipe.name}' уже в избранном"},
+                {'errors': f"Рецепт '{recipe.name}' уже в избранном"},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -270,7 +282,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @favorite.mapping.delete
     def remove_from_favorite(self, request, pk=None):
-        """Удаляет рецепт из избранного текущего пользователя."""
+        '''
+        Удаляет рецепт из избранного текущего пользователя.
+        '''
+        
 
         recipe = get_object_or_404(Recipe, pk=pk)
         favorite_relation = Favorite.objects.filter(
@@ -288,55 +303,55 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=False,
-        methods=["get"],
-        url_path="download_shopping_cart",
+        methods=['get'],
+        url_path='download_shopping_cart',
         permission_classes=[permissions.IsAuthenticated],
     )
     def download_shopping_cart(self, request):
 
         document = Document()
-        document.add_heading("Список покупок", level=1)
+        document.add_heading('Список покупок', level=1)
         recipes_shop = request.user.shopping_cart
         ingredients = (
             RecipeIngredient.objects.filter(
-                recipe__in=recipes_shop.values_list("recipe", flat=True)
+                recipe__in=recipes_shop.values_list('recipe', flat=True)
             )
-            .values("ingredient__name", "ingredient__measurement_unit")
-            .annotate(total_amount=Sum("amount"))
-            .order_by("ingredient__name")
+            .values('ingredient__name', 'ingredient__measurement_unit')
+            .annotate(total_amount=Sum('amount'))
+            .order_by('ingredient__name')
         )
 
         if ingredients:
             table = document.add_table(rows=1, cols=3)
-            table.style = "Table Grid"
+            table.style = 'Table Grid'
             hdr_cells = table.rows[0].cells
-            hdr_cells[0].text = "№"
-            hdr_cells[1].text = "Ингредиент"
-            hdr_cells[2].text = "Количество"
+            hdr_cells[0].text = '№'
+            hdr_cells[1].text = 'Ингредиент'
+            hdr_cells[2].text = 'Количество'
 
             for idx, ing in enumerate(ingredients, start=1):
                 row_cells = table.add_row().cells
                 row_cells[0].text = str(idx)
-                row_cells[1].text = ing["ingredient__name"]
+                row_cells[1].text = ing['ingredient__name']
                 row_cells[2].text = (
-                    f"{ing['total_amount']} "
-                    f"{ing['ingredient__measurement_unit']}"
+                    f'{ing['total_amount']} '
+                    f'{ing['ingredient__measurement_unit']}'
                 )
         else:
-            document.add_paragraph("Список покупок пуст!")
+            document.add_paragraph('Список покупок пуст!')
 
         buffer = BytesIO()
         document.save(buffer)
         buffer.seek(0)
 
         сontent_type = (
-            "application/vnd.openxmlformats-officedocument."
-            "wordprocessingml.document"
+            'application/vnd.openxmlformats-officedocument.'
+            'wordprocessingml.document'
         )
         return FileResponse(
             buffer,
             as_attachment=True,
-            filename="shopping_list.docx",
+            filename='shopping_list.docx',
             content_type=сontent_type,
         )
 
