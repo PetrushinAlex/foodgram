@@ -1,19 +1,31 @@
 from rest_framework import permissions
+from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 
 
-class IsAuthorOrAdmin(permissions.BasePermission):
+class IsAuthorOrReadOnlyPermission(IsAuthenticated):
     '''
-    Переопределенный пермишен для проверки аутентификации
-    пользователя в роли администратора или автора.
+    Разрешение, позволяющее:
+    - Чтение (GET, HEAD, OPTIONS) для всех пользователей
+    - Запись только автору объекта
+    - Только аутентифицированным пользователям для небезопасных методов
     '''
+
     def has_permission(self, request, view):
+        '''
+        Проверка базовых разрешений для эндпоинта
+        '''
+
         return (
-            request.user.is_authenticated
-            or request.method in permissions.SAFE_METHODS
+            request.method in SAFE_METHODS 
+            or request.user.is_authenticated
         )
 
     def has_object_permission(self, request, view, obj):
+        '''
+        Проверка разрешений для конкретного экземпляра объекта
+        '''
+
         return (
-            request.user.is_superuser
-            or obj.author == request.user
+            request.method in SAFE_METHODS or
+            obj.author == request.user
         )
