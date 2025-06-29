@@ -31,7 +31,7 @@ class CustomUserAdmin(UserAdmin):
 @admin.register(models.Sub)
 class SubAdmin(admin.ModelAdmin):
     '''
-    Класс для регистрации модели подписчика с полями для поиска 
+    Класс для регистрации модели подписчика с полями для поиска
     у автора и подписчика.
     '''
     list_display = (

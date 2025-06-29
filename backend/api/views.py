@@ -1,30 +1,28 @@
-from datetime import datetime
-from http import HTTPStatus
 from io import BytesIO
-
-from django.conf import settings
 from django.db.models import Sum
 from django.urls import reverse
 from django_filters.rest_framework import DjangoFilterBackend
-from django.http import HttpResponse, FileResponse
+from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django.core.files.storage import default_storage
 from docx import Document
-from rest_framework import serializers, status, viewsets
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
+from rest_framework.permissions import IsAuthenticated
 from django.db.models.functions import Lower
 from django.contrib.auth import get_user_model
 from djoser.views import UserViewSet as DjoserUserViewSet
-from rest_framework.decorators import action
 from rest_framework.response import Response
-from hashids import Hashids
 from rest_framework import permissions
 
 from . import serializers as myserializers
-from food.models import Recipe, Tag, Ingredient, Favorite, ShoppingCart, RecipeIngredient
+from food.models import (
+    Recipe, Tag, Ingredient, Favorite, ShoppingCart, RecipeIngredient
+)
 from users.models import Sub
-from tools import filters as tools_filters, paginators as tools_paginators, permissions as tools_permissions
+from tools import (
+    filters as tools_filters, paginators as tools_paginators, permissions as tools_permissions
+)
 
 
 User = get_user_model()
@@ -126,7 +124,7 @@ class UserViewSet(DjoserUserViewSet):
         )
         if not created:
             return Response(
-                {'errors': f'Вы уже подписаны на пользователя {author.username}.'},
+                {'errors': f'Вы уже подписаны на {author.username}.'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         data = myserializers.SubscribeSerializer(
@@ -231,7 +229,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response(
             serializer.data, status=status.HTTP_201_CREATED)
 
-
     @shopping_cart.mapping.delete
     def remove_from_shopping_cart(self, request, pk=None):
         '''
@@ -285,7 +282,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         '''
         Удаляет рецепт из избранного текущего пользователя.
         '''
-        
 
         recipe = get_object_or_404(Recipe, pk=pk)
         favorite_relation = Favorite.objects.filter(

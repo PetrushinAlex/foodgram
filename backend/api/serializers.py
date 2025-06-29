@@ -1,9 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.shortcuts import get_object_or_404
-from rest_framework import relations, serializers
+from rest_framework import serializers
 from drf_extra_fields.fields import Base64ImageField
-from rest_framework.exceptions import ValidationError
 from djoser.serializers import (
     UserSerializer as DjoserUserSerializer,
 )
@@ -12,8 +11,6 @@ from rest_framework.fields import SerializerMethodField
 from food.models import (
     Recipe, Tag, Ingredient, Favorite, ShoppingCart, RecipeIngredient
 )
-from users.models import Sub
-from tools import constants
 
 
 User = get_user_model()
@@ -36,7 +33,7 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
 
         representation = super().to_representation(instance)
         favorite = get_object_or_404(
-            Favorite, 
+            Favorite,
             pk=representation['id'],
         )
         return RecipeSimpleSerializer(favorite.recipe).data
@@ -334,30 +331,31 @@ class RecipeSerializer(serializers.ModelSerializer):
         if self.context['request'].method == 'POST' and (
                 image is None or image == ''):
             raise serializers.ValidationError(
-                {'image':
-                     'Изображение не заполненно'
-                 }
+                {'image': 'Изображение не заполненно'}
             )
 
         if not t:
             raise serializers.ValidationError(
-                {'tags':
-                     'Поле Тег  не заполненно'
+                {
+                    'tags':
+                        'Поле Тег  не заполненно'
                  }
             )
         t_ids = [tag.id for tag in t]
         if len(t_ids) != len(set(t_ids)):
             raise serializers.ValidationError(
-                {'tags':
+                {
+                    'tags':
                      'Дублирование тегов!.'
                  }
             )
 
         if not ingredients:
             raise serializers.ValidationError(
-                {'ingredient':
-                     'Поле Ингридиент  не заполненно'
-                     ''
+                {
+                    'ingredient':
+                        'Поле Ингридиент  не заполненно'
+                        ''
                 }
             )
         for ingredient in ingredients:

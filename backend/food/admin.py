@@ -30,8 +30,8 @@ class RecipeIngredientInline(admin.TabularInline):
 @admin.register(models.Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = (
-        'id', 
-        'name', 
+        'id',
+        'name',
         'author',
     )
     list_filter = (
@@ -44,7 +44,7 @@ class RecipeAdmin(admin.ModelAdmin):
     @admin.display(description='Количество в избранных')
     def in_favorites(self, obj):
         return obj.favorites.count()
-    
+
 
 @admin.register(models.ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
