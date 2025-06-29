@@ -1,7 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.core.validators import RegexValidator
 
-from tools import constants as cnst
+from tools import constants
 
 
 class CustomUser(AbstractUser):
@@ -12,24 +13,33 @@ class CustomUser(AbstractUser):
     '''
 
     username = models.CharField(
-        max_length=cnst.MAX_LENGHT_NAME,
-        verbose_name='Название аккаунта',
+        verbose_name='имя пользователя',
+        max_length=constants.MAX_LENGHT_NAME,
         unique=True,
-        db_index=True,
+        validators=[RegexValidator(r"^[\w.@+-]+$")],
     )
     email = models.EmailField(
-        max_length=cnst.MAX_LENGHT_NAME,
+        max_length=constants.MAX_LENGHT_NAME,
         verbose_name='Электронная почта',
         unique=True,
     )
     first_name = models.CharField(
-        max_length=cnst.MAX_LENGHT_NAME,
+        max_length=constants.MAX_LENGHT_NAME,
         verbose_name='Имя',
     )
     last_name = models.CharField(
-        max_length=cnst.MAX_LENGHT_NAME,
+        max_length=constants.MAX_LENGHT_NAME,
         verbose_name='Фамилия',
     )
+    avatar = models.ImageField(
+        upload_to='avatars/',
+        default='avatars/default_avatar.png',
+        null=True,
+    )
+
+
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name', 'password']
+    USERNAME_FIELD = 'email'
 
     class Meta:
         ordering = ['id']
@@ -52,23 +62,22 @@ class Sub(models.Model):
     полей автор-подписчик.
     '''
 
-    author = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        related_name='subscription',
-        verbose_name='Автор',
-    )
     user = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
-        related_name='subscriber',
-        verbose_name='Подписчик',
+        related_name='subscriptions',
+        verbose_name='кто подписался',
+    )
+    author = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='users_subscribers',
+        verbose_name='на кого подписались',
     )
 
     class Meta:
         verbose_name = 'Подписчик'
         verbose_name_plural = 'Подписчики'
-        ordering = ('-id',)
         constraints = [
             models.UniqueConstraint(
                 fields=('user', 'author',),
@@ -77,4 +86,7 @@ class Sub(models.Model):
         ]
 
         def __str__(self):
-            return f'Пользователь {self.user.username} подписан на {self.author.username}'
+            return (
+                f'Пользователь {self.user.username} '
+                f'подписан на {self.author.username}'
+            )
