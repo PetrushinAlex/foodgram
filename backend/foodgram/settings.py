@@ -13,7 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', get_random_secret_key())
 
-DEBUG = os.getenv('DEBUG', default=False) == 'True'
+DEBUG = True
 
 ALLOWED_HOSTS = ['84.201.176.249', '127.0.0.1', 'localhost', 'foodgrammick.hopto.org']
 
