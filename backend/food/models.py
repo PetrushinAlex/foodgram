@@ -150,33 +150,6 @@ class Recipe(models.Model):
         return self.name
 
 
-class RecipeTag(models.Model):
-    '''
-    Модель для тэга рецепта, создающая
-    промежуточную таблице (many-to-many связь).
-    '''
-
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        related_name='recipe_tags',
-        verbose_name='Рецепт',
-    )
-    tag = models.ForeignKey(
-        Tag,
-        on_delete=models.CASCADE,
-        related_name='recipe_tags',
-        verbose_name='Тэг',
-    )
-
-    class Meta:
-        verbose_name = 'Тэг рецепта'
-        verbose_name_plural = 'Тэги рецепта'
-    
-    def __str__(self):
-        return self.tag.name
-
-
 class RecipeIngredient(models.Model):
     '''
     Модель для ингредиентов в рецептах, создающая
