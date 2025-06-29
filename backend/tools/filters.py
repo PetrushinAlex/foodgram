@@ -1,12 +1,16 @@
 from django_filters.rest_framework import FilterSet, filters
-
 from food import models
 
 
 class RecipeFilter(FilterSet):
     '''
-    Фильтр для вьюсета рецептов.
+    Фильтр для рецептов с возможностью фильтрации по:
+    - автору
+    - тегам
+    - наличию в списке покупок
+    - наличию в избранном
     '''
+
     author = filters.CharFilter(
         field_name='author__id',
     )
@@ -15,11 +19,11 @@ class RecipeFilter(FilterSet):
         to_field_name='slug',
         queryset=models.Tag.objects.all(),
     )
-    is_in_shoppin_cart = filters.BooleanFilter(
-        method='filter_is_in_shoppin_cart',
+    is_in_shopping_cart = filters.BooleanFilter(
+        method='filter_shopping_cart_recipes',
     )
-    is_in_favorite = filters.BooleanFilter(
-        method='filter_is_in_favorite',
+    is_favorited = filters.BooleanFilter(
+        method='filter_favorite_recipes',
     )
 
     class Meta:
@@ -27,41 +31,42 @@ class RecipeFilter(FilterSet):
         fields = (
             'author',
             'tags',
-            'is_in_shoppin_cart',
-            'is_in_favorite',
+            'is_in_shopping_cart',
+            'is_favorited',
         )
-    
-    def filter_is_in_shoppin_cart(self, queryset, name, value):
+
+    def filter_shopping_cart_recipes(self, queryset, name, value):
         '''
-        Метод для фильтрации рецептов по нахождению их в 
-        корзине для покупок у запрашиваемого пользователя.
+        Фильтрует рецепты по их наличию в списке покупок пользователя.
         '''
+
         user = self.request.user
         if user.is_authenticated and value:
             return queryset.filter(shopping_cart__user=user)
         return queryset
 
-    def filter_is_in_favorite(self, queryset, name, value):
+    def filter_favorite_recipes(self, queryset, name, value):
         '''
-        Метод для фильтрации рецептов по нахождению их в
-        избранном у запрашиваемого пользователя.
+        Фильтрует рецепты по их наличию в избранном пользователя.
         '''
+
         user = self.request.user
         if user.is_authenticated and value:
             return queryset.filter(favorite__user=user)
         return queryset
 
 
-class IngredientFilter(FilterSet):
+class IngredientSearchFilter(FilterSet):
     '''
-    Фильтр для вьюсета ингредиентов.
+    Фильтр для поиска ингредиентов по названию.
+    Поддерживает поиск по начальным буквам (case-insensitive).
     '''
+
     name = filters.CharFilter(
-        lookup_expr='startswith',
+        field_name='name',
+        lookup_expr='istartswith',
     )
 
     class Meta:
         model = models.Ingredient
-        fields = (
-            'name',
-        )
+        fields = ('name',)

@@ -1,14 +1,13 @@
 from rest_framework.pagination import PageNumberPagination
+from . import constants as app_constants
 
-from . import constants
 
-
-class CustomRecipePaginator(PageNumberPagination):
+class Paginator(PageNumberPagination):
     '''
-    Кастомный пагинатор, устанавливающий по определенное в константе 
-    количество объектов на страницу и позволяющий переопределить 
-    это количество через параметр limit.
+    Кастомный пагинатор для API с возможностью:
+    - установки размера страницы по умолчанию из констант
+    - динамического изменения размера страницы через параметр limit
     '''
 
-    page_size = constants.DEFAULT_PAGE_SIZE
+    page_size = app_constants.DEFAULT_PAGE_SIZE
     page_size_query_param = 'limit'
