@@ -336,27 +336,17 @@ class RecipeSerializer(serializers.ModelSerializer):
 
         if not t:
             raise serializers.ValidationError(
-                {
-                    'tags':
-                        'Поле Тег  не заполненно'
-                 }
+                {'tags': 'Поле Тег  не заполненно'}
             )
         t_ids = [tag.id for tag in t]
         if len(t_ids) != len(set(t_ids)):
             raise serializers.ValidationError(
-                {
-                    'tags':
-                     'Дублирование тегов!.'
-                 }
+                {'tags': 'Дублирование тегов!.'}
             )
 
         if not ingredients:
             raise serializers.ValidationError(
-                {
-                    'ingredient':
-                        'Поле Ингридиент  не заполненно'
-                        ''
-                }
+                {'ingredient': 'Поле Ингридиент  не заполненно'}
             )
         for ingredient in ingredients:
             amount = ingredient.get('amount')
