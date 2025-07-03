@@ -49,9 +49,9 @@ class UserSerializer(serializers.ModelSerializer):
 
         request = self.context.get("request")
         return (
-                request
-                and request.user.is_authenticated
-                and request.user.subscriptions.filter(author=obj).exists()
+            request
+            and request.user.is_authenticated
+            and request.user.subscriptions.filter(author=obj).exists()
         )
 
 
@@ -191,7 +191,10 @@ class RecipeIngredientReadSerializer(serializers.ModelSerializer):
     Возвращает id, имя, ед. изм. и количество.
     """
 
-    id = serializers.PrimaryKeyRelatedField(read_only=True, source="ingredient")
+    id = serializers.PrimaryKeyRelatedField(
+        read_only=True,
+        source="ingredient"
+    )
     name = serializers.CharField(source="ingredient.name", read_only=True)
     measurement_unit = serializers.CharField(
         source="ingredient.measurement_unit", read_only=True
@@ -272,17 +275,17 @@ class RecipeReadSerializer(serializers.ModelSerializer):
     def get_is_favorited(self, obj):
         request = self.context.get("request")
         return (
-                request
-                and request.user.is_authenticated
-                and obj.favorite.filter(user=request.user).exists()
+            request
+            and request.user.is_authenticated
+            and obj.favorite.filter(user=request.user).exists()
         )
 
     def get_is_in_shopping_cart(self, obj):
         request = self.context.get("request")
         return (
-                request
-                and request.user.is_authenticated
-                and obj.shopping_cart.filter(user=request.user).exists()
+            request
+            and request.user.is_authenticated
+            and obj.shopping_cart.filter(user=request.user).exists()
         )
 
 
@@ -305,7 +308,10 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
                 1, message="Время приготовления не может быть меньше 1 минуты"
             ),
             MaxValueValidator(
-                9999, message="Время приготовления не может превышать 9999 минут"
+                9999, 
+                message=(
+                    "Время приготовления не может превышать 9999 минут"
+                )
             ),
         ],
     )
@@ -334,15 +340,23 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         image = data.get("image")
         cooking_time = data.get("cooking_time")
 
-        if self.context["request"].method == "POST" and (image is None or image == ""):
-            raise serializers.ValidationError({"image": "Изображение не заполненно"})
+        if self.context["request"].method == "POST" and (
+            image is None or image == ""
+        ):
+            raise serializers.ValidationError(
+                {"image": "Изображение не заполненно"}
+            )
 
         if not t:
-            raise serializers.ValidationError({"tags": "Поле Тег  не заполненно"})
+            raise serializers.ValidationError(
+                {"tags": "Поле Тег  не заполненно"}
+            )
 
         t_ids = [tag.id for tag in t]
         if len(t_ids) != len(set(t_ids)):
-            raise serializers.ValidationError({"tags": "Дублирование тегов!."})
+            raise serializers.ValidationError(
+                {"tags": "Дублирование тегов!."}
+            )
 
         if not ingredients:
             raise serializers.ValidationError(
@@ -370,7 +384,9 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
                 {"cooking_time": f"Время должно быть {1} - {9999} мин."}
             )
         if image is None or image == "":
-            raise serializers.ValidationError({"image": "Изображение  не заполненно"})
+            raise serializers.ValidationError(
+                {"image": "Изображение  не заполненно"}
+            )
 
         return data
 

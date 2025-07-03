@@ -181,7 +181,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
-        
+
     @action(
         detail=True,
         methods=['get'],
@@ -194,7 +194,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return response.Response(
             {'short-link': short_url}, status=status.HTTP_200_OK
         )
-
 
     @action(
         detail=True,
@@ -213,7 +212,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.save()
 
         return response.Response(
-            myserializers.RecipeSimpleSerializer(recipe, context={'request': request}).data,
+            myserializers.RecipeSimpleSerializer(
+                recipe,
+                context={'request': request}
+            ).data,
             status=status.HTTP_201_CREATED
         )
 
@@ -227,7 +229,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
         if deleted_count == 0:
             return response.Response(
-                {'errors': f'Рецепт не найден в корзине'},
+                {'errors': 'Рецепт не найден в корзине'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -250,7 +252,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.save()
 
         return response.Response(
-            myserializers.RecipeSimpleSerializer(recipe, context={'request': request}).data,
+            myserializers.RecipeSimpleSerializer(
+                recipe,
+                context={'request': request}
+            ).data,
             status=status.HTTP_201_CREATED
         )
 
@@ -264,7 +269,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
         if deleted_count == 0:
             return response.Response(
-                {'errors': f'Рецепт не найден в избранном'},
+                {'errors': 'Рецепт не найден в избранном'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -303,7 +308,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 row_cells[0].text = str(idx)
                 row_cells[1].text = ing["ingredient__name"]
                 row_cells[2].text = (
-                    f"{ing['total_amount']} " f"{ing['ingredient__measurement_unit']}"
+                    f"{ing['total_amount']} "
+                    f"{ing['ingredient__measurement_unit']}"
                 )
         else:
             document.add_paragraph("Список покупок пуст!")
@@ -313,7 +319,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         buffer.seek(0)
 
         content_type = (
-            "application/vnd.openxmlformats-officedocument." "wordprocessingml.document"
+            "application/vnd.openxmlformats-officedocument."
+            "wordprocessingml.document"
         )
         return FileResponse(
             buffer,

@@ -51,8 +51,7 @@ class Ingredient(models.Model):
     """
 
     name = models.CharField(
-        max_length=cnst.MAX_LENGHT_INGREDIENT_NAME
-        ,
+        max_length=cnst.MAX_LENGHT_INGREDIENT_NAME,
         db_index=True,
         verbose_name="Ингредиент",
     )
@@ -136,11 +135,15 @@ class Recipe(models.Model):
         validators=[
             MinValueValidator(
                 cnst.COOKING_TIME_MIN,
-                message=f"Количество не может быть меньше {cnst.COOKING_TIME_MIN}."
+                message=(
+                    f"Время готовки не менее {cnst.COOKING_TIME_MIN}."
+                )
             ),
             MaxValueValidator(
                 cnst.COOKING_TIME_MAX,
-                message=f"Количество не может превышать {cnst.COOKING_TIME_MAX}."
+                message=(
+                    f"Время готовки не более {cnst.COOKING_TIME_MAX}."
+                )
             ),
         ],
     )
@@ -202,7 +205,8 @@ class RecipeIngredient(models.Model):
 
     def __str__(self):
         return (
-            f"{self.ingredient.name} ({self.amount})" f"для рецепта {self.recipe.name}"
+            f"{self.ingredient.name} ({self.amount})"
+            f"для рецепта {self.recipe.name}"
         )
 
 

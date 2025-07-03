@@ -10,7 +10,7 @@ class ExtendedUser(AbstractUser):
     Переопределены поля юзернейма, электронной почты, имени и фамилии.
     На уровне базы данных задана сортировка по id.
     """
-    
+
     email = models.EmailField(
         max_length=constants.MAX_LENGHT_NAME,
         verbose_name="Электронная почта",
