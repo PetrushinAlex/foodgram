@@ -8,7 +8,6 @@ class TagAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'name',
-        'color',
     )
     list_filter = ('slug',)
 
@@ -25,6 +24,7 @@ class IngredientAdmin(admin.ModelAdmin):
 
 class RecipeIngredientInline(admin.TabularInline):
     model = models.RecipeIngredient
+    validate_min = True
 
 
 @admin.register(models.Recipe)
