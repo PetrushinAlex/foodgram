@@ -1,15 +1,16 @@
 from django_filters.rest_framework import FilterSet, filters
+
 from food import models
 
 
 class RecipeFilter(FilterSet):
-    '''
+    """
     Фильтр для рецептов с возможностью фильтрации по:
     - автору
     - тегам
     - наличию в списке покупок
     - наличию в избранном
-    '''
+    """
 
     author = filters.CharFilter(
         field_name='author__id',
@@ -36,9 +37,9 @@ class RecipeFilter(FilterSet):
         )
 
     def filter_shopping_cart_recipes(self, queryset, name, value):
-        '''
+        """
         Фильтрует рецепты по их наличию в списке покупок пользователя.
-        '''
+        """
 
         user = self.request.user
         if user.is_authenticated and value:
@@ -46,9 +47,9 @@ class RecipeFilter(FilterSet):
         return queryset
 
     def filter_favorite_recipes(self, queryset, name, value):
-        '''
+        """
         Фильтрует рецепты по их наличию в избранном пользователя.
-        '''
+        """
 
         user = self.request.user
         if user.is_authenticated and value:
@@ -57,10 +58,10 @@ class RecipeFilter(FilterSet):
 
 
 class IngredientSearchFilter(FilterSet):
-    '''
+    """
     Фильтр для поиска ингредиентов по названию.
     Поддерживает поиск по начальным буквам (case-insensitive).
-    '''
+    """
 
     name = filters.CharFilter(
         field_name='name',
