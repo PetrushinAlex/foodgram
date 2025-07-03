@@ -308,7 +308,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
                 1, message="Время приготовления не может быть меньше 1 минуты"
             ),
             MaxValueValidator(
-                9999, 
+                9999,
                 message=(
                     "Время приготовления не может превышать 9999 минут"
                 )
