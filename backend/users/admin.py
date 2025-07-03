@@ -4,11 +4,11 @@ from django.contrib.auth.admin import UserAdmin
 from . import models
 
 
-@admin.register(models.CustomUser)
+@admin.register(models.ExtendedUser)
 class CustomUserAdmin(UserAdmin):
-    '''
+    """
     Кастомный класс для регистрации модели пользователя в админке.
-    '''
+    """
     list_display = (
         'id',
         'username',
@@ -30,10 +30,10 @@ class CustomUserAdmin(UserAdmin):
 
 @admin.register(models.Sub)
 class SubAdmin(admin.ModelAdmin):
-    '''
+    """
     Класс для регистрации модели подписчика с полями для поиска
     у автора и подписчика.
-    '''
+    """
     list_display = (
         'id',
         'author',
