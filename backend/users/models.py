@@ -12,7 +12,6 @@ class ExtendedUser(AbstractUser):
     """
 
     email = models.EmailField(
-        max_length=constants.MAX_LENGHT_NAME,
         verbose_name="Электронная почта",
         unique=True,
     )
@@ -34,12 +33,12 @@ class ExtendedUser(AbstractUser):
     USERNAME_FIELD = "email"
 
     class Meta:
-        ordering = ["id"]
+        ordering = ["username"]
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
 
     def __str__(self):
-        return self.username
+        return f"Пользователь {self.username} ({self.email})"
 
 
 class Sub(models.Model):
