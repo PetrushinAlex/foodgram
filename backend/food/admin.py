@@ -24,6 +24,7 @@ class IngredientAdmin(admin.ModelAdmin):
 
 class RecipeIngredientInline(admin.TabularInline):
     model = models.RecipeIngredient
+    min_num = 1
     validate_min = True
 
 
