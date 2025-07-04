@@ -5,7 +5,6 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.http import FileResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from rest_framework import response
-from django.core.files.storage import default_storage
 from docx import Document
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -99,7 +98,7 @@ class UserViewSet(DjoserUserViewSet):
     def subscribe(self, request, *args, **kwargs):
         author = self.get_object()
         user = request.user
-        
+
         serializer = myserializers.SubscribeSerializer(
             data={},
             context={
@@ -114,7 +113,7 @@ class UserViewSet(DjoserUserViewSet):
         )
         subscription = serializer.save()
         data = serializer.to_representation(subscription)
-        
+
         return response.Response(
             data,
             status=status.HTTP_201_CREATED
@@ -129,7 +128,7 @@ class UserViewSet(DjoserUserViewSet):
             user=user,
             author=author
         ).delete()
-        
+
         if not deleted_count:
             return response.Response(
                 {'errors': 'Подписка не найдена.'},

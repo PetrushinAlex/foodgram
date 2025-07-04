@@ -167,7 +167,9 @@ class Recipe(models.Model):
             hashids = Hashids(salt=settings.SECRET_KEY, min_length=5)
             while True:
                 self.short_code = hashids.encode(self.id)
-                if not Recipe.objects.filter(short_code=self.short_code).exists():
+                if not Recipe.objects.filter(
+                    short_code=self.short_code
+                ).exists():
                     break
 
         super().save(*args, **kwargs)
