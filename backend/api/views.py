@@ -85,26 +85,21 @@ class UserViewSet(DjoserUserViewSet):
     @avatar.mapping.delete
     def avatar_delete(self, request, *args, **kwargs):
         if request.user.avatar:
-            default_storage.delete(request.user.avatar.name)
             request.user.avatar.delete()
+            request.user.avatar = None
             request.user.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=True,
-        methods=["post", "delete"],
+        methods=["post"],
         permission_classes=[permissions.IsAuthenticated],
         url_path="subscribe",
     )
     def subscribe(self, request, *args, **kwargs):
         author = self.get_object()
         user = request.user
-        if request.method == "POST":
-            return self._create_subscription(user, author, request)
-        return self._delete_subscription(user, author)
-
-    def _create_subscription(self, user, author, request):
-        """Создает подписку на пользователя"""
+        
         serializer = myserializers.SubscribeSerializer(
             data={},
             context={
@@ -112,33 +107,29 @@ class UserViewSet(DjoserUserViewSet):
                 'view': self
             }
         )
-        if not serializer.is_valid():
-            return response.Response(
-                serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST
-            )
 
         subscription = Sub(
             user=user,
             author=author
         )
-        subscription.save()
-
-        data = myserializers.SubscribeSerializer(
-            author,
-            context={'request': request}
-        ).data
+        subscription = serializer.save()
+        data = serializer.to_representation(subscription)
+        
         return response.Response(
             data,
             status=status.HTTP_201_CREATED
         )
 
-    def _delete_subscription(self, user, author):
-        """Удаляет подписку на пользователя"""
+    @subscribe.mapping.delete
+    def unsubscribe(self, request, *args, **kwargs):
+        author = self.get_object()
+        user = request.user
+
         deleted_count, _ = Sub.objects.filter(
             user=user,
             author=author
         ).delete()
+        
         if not deleted_count:
             return response.Response(
                 {'errors': 'Подписка не найдена.'},
@@ -206,17 +197,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(Recipe, id=pk)
 
         serializer = myserializers.ShoppingCartSerializer(
-            data={'recipe': recipe.id},
+            data={"user": request.user.id, "recipe": recipe.id},
             context={'request': request}
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
         return response.Response(
-            myserializers.RecipeSimpleSerializer(
-                recipe,
-                context={'request': request}
-            ).data,
+            serializer.data,
             status=status.HTTP_201_CREATED
         )
 
@@ -228,7 +216,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             recipe=recipe
         ).delete()
 
-        if deleted_count == 0:
+        if not deleted_count:
             return response.Response(
                 {'errors': 'Рецепт не найден в корзине'},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -246,17 +234,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(Recipe, id=pk)
 
         serializer = myserializers.FavoriteSerializer(
-            data={'recipe': recipe.id},
+            data={"user": request.user.id, "recipe": recipe.id},
             context={'request': request}
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
         return response.Response(
-            myserializers.RecipeSimpleSerializer(
-                recipe,
-                context={'request': request}
-            ).data,
+            serializer.data,
             status=status.HTTP_201_CREATED
         )
 
@@ -268,7 +253,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             recipe=recipe
         ).delete()
 
-        if deleted_count == 0:
+        if not deleted_count:
             return response.Response(
                 {'errors': 'Рецепт не найден в избранном'},
                 status=status.HTTP_400_BAD_REQUEST,
