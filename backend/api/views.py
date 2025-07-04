@@ -15,6 +15,7 @@ from django.contrib.auth import get_user_model
 from djoser.views import UserViewSet as DjoserUserViewSet
 from rest_framework.response import Response
 from rest_framework import permissions
+
 from . import serializers as myserializers
 from food.models import (
     Recipe,

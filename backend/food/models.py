@@ -16,7 +16,7 @@ class Tag(models.Model):
     Описаны поля:
     name - название тэга (str);
     slug - название слага (str).
-    В Meta классе по умолчанию сортировка по id.
+    В Meta классе по умолчанию сортировка по name.
     """
 
     name = models.CharField(
@@ -33,7 +33,7 @@ class Tag(models.Model):
     class Meta:
         verbose_name = "Тэг"
         verbose_name_plural = "Тэги"
-        ordering = ["name"]
+        ordering = ("name",)
 
     def __str__(self):
         return f"Tag: {self.name}"
@@ -63,7 +63,7 @@ class Ingredient(models.Model):
     class Meta:
         verbose_name = "Ингредиент"
         verbose_name_plural = "Ингредиенты"
-        ordering = ["name"]
+        ordering = ("name",)
         constraints = [
             models.UniqueConstraint(
                 fields=[
@@ -148,7 +148,7 @@ class Recipe(models.Model):
         ],
     )
     short_code = models.CharField(
-        max_length=10,
+        max_length=cnst.MAX_LENGHT_SMALL,
         unique=True,
         blank=True,
         null=True,
@@ -159,15 +159,18 @@ class Recipe(models.Model):
     class Meta:
         verbose_name = "Рецепт"
         verbose_name_plural = "Рецепты"
-        ordering = ["name"]
+        ordering = ("name",)
 
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
 
         if not self.short_code:
             hashids = Hashids(salt=settings.SECRET_KEY, min_length=5)
-            self.short_code = hashids.encode(self.id)
-            super().save(update_fields=["short_code"])
+            while True:
+                self.short_code = hashids.encode(self.id)
+                if not Recipe.objects.filter(short_code=self.short_code).exists():
+                    break
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Recipe: {self.name}"
@@ -194,14 +197,25 @@ class RecipeIngredient(models.Model):
     amount = models.PositiveSmallIntegerField(
         verbose_name="Количество ингредиента",
         validators=[
-            MinValueValidator(cnst.AMOUNT_RECIPE_INGREDIENT_MIN),
+            MinValueValidator(
+                cnst.AMOUNT_RECIPE_INGREDIENT_MIN,
+                message=(
+                    f"Не менее {cnst.AMOUNT_RECIPE_INGREDIENT_MIN}."
+                )
+            ),
+            MaxValueValidator(
+                cnst.AMOUNT_RECIPE_INGREDIENT_MAX,
+                message=(
+                    f"Не более {cnst.AMOUNT_RECIPE_INGREDIENT_MAX}."
+                )
+            ),
         ],
     )
 
     class Meta:
         verbose_name = "Ингредиент рецепта"
         verbose_name_plural = "Ингредиенты рецепта"
-        ordering = ["id"]
+        ordering = ("recipe__name",)
 
     def __str__(self):
         return (
