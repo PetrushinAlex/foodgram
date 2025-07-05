@@ -1,13 +1,10 @@
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
-from hashids import Hashids
 
 from food import constants as cnst
 
 User = get_user_model()
-hashids = Hashids(salt=settings.SECRET_KEY, min_length=5)
 
 
 class Tag(models.Model):
@@ -162,16 +159,6 @@ class Recipe(models.Model):
         ordering = ("name",)
 
     def save(self, *args, **kwargs):
-
-        if not self.short_code:
-            hashids = Hashids(salt=settings.SECRET_KEY, min_length=5)
-            while True:
-                self.short_code = hashids.encode(self.id)
-                if not Recipe.objects.filter(
-                    short_code=self.short_code
-                ).exists():
-                    break
-
         super().save(*args, **kwargs)
 
     def __str__(self):

@@ -14,6 +14,10 @@ from django.contrib.auth import get_user_model
 from djoser.views import UserViewSet as DjoserUserViewSet
 from rest_framework.response import Response
 from rest_framework import permissions
+from hashids import Hashids
+from django.conf import settings
+
+hashids = Hashids(salt=settings.SECRET_KEY, min_length=5)
 
 from . import serializers as myserializers
 from food.models import (
@@ -99,35 +103,40 @@ class UserViewSet(DjoserUserViewSet):
         author = self.get_object()
         user = request.user
 
-        serializer = myserializers.SubscriptionCreateSerializer(
-            data={"user": user, "author": author},
-            context={
-                'request': request,
-                'view': self
-            }
-        )
+        # if not request.user.is_authenticated:
+        #     return Response({"error": "Требуется авторизация"}, status=401)
+    
+        if user == author:
+            return response.Response(
+                {"error": "Нельзя подписаться на себя"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        if Sub.objects.filter(user=user, author=author).exists():
+            return response.Response(
+                {"error": "Вы уже подписаны"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
+        serializer = myserializers.SubscriptionCreateSerializer(
+            data={"user": user.id, "author": author.id},
+            context={"request": request, "view": self},
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        return response.Response(
-            serializer.data,
-            status=status.HTTP_201_CREATED
+        response_serializer = myserializers.AuthorWithRecipesSerializer(
+            author, context={"request": request}
         )
+        return response.Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
     @subscribe.mapping.delete
     def unsubscribe(self, request, *args, **kwargs):
         author = self.get_object()
         user = request.user
 
-        deleted_count, _ = Sub.objects.filter(
-            user=user,
-            author=author
-        ).delete()
+        deleted_count, _ = Sub.objects.filter(user=user, author=author).delete()
 
         if not deleted_count:
             return response.Response(
-                {'errors': 'Подписка не найдена.'},
+                {"errors": "Подписка не найдена."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -141,9 +150,7 @@ class UserViewSet(DjoserUserViewSet):
     )
     def subscriptions(self, request, *args, **kwargs):
         user = request.user
-        queryset = User.objects.filter(
-            users_subscribers__user=user
-        )
+        queryset = User.objects.filter(users_subscribers__user=user)
         pages = self.paginate_queryset(queryset)
         serializer = myserializers.SubscribeSerializer(
             pages, many=True, context={"request": request}
@@ -167,20 +174,17 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return myserializers.RecipeWriteSerializer
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        recipe = serializer.save()
 
-    @action(
-        detail=True,
-        methods=['get'],
-        url_path='get-link'
-    )
+        recipe.short_code = hashids.encode(recipe.id)
+        recipe.save()
+
+    @action(detail=True, methods=["get"], url_path="get-link")
     def link(self, request, *args, **kwargs):
         recipe = self.get_object()
-        base_url = request.build_absolute_uri('/')[:-1]
-        short_url = f'{base_url}/r/{recipe.short_code}'
-        return response.Response(
-            {'short-link': short_url}, status=status.HTTP_200_OK
-        )
+        base_url = request.build_absolute_uri("/")[:-1]
+        short_url = f"{base_url}/r/{recipe.short_code}"
+        return response.Response({"short-link": short_url}, status=status.HTTP_200_OK)
 
     @action(
         detail=True,
@@ -193,27 +197,23 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
         serializer = myserializers.ShoppingCartSerializer(
             data={"user": request.user.id, "recipe": recipe.id},
-            context={'request': request}
+            context={"request": request},
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        return response.Response(
-            serializer.data,
-            status=status.HTTP_201_CREATED
-        )
+        return response.Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @shopping_cart.mapping.delete
     def remove_from_shopping_cart(self, request, pk=None):
         recipe = get_object_or_404(Recipe, pk=pk)
         deleted_count, _ = ShoppingCart.objects.filter(
-            user=request.user,
-            recipe=recipe
+            user=request.user, recipe=recipe
         ).delete()
 
         if not deleted_count:
             return response.Response(
-                {'errors': 'Рецепт не найден в корзине'},
+                {"errors": "Рецепт не найден в корзине"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -230,27 +230,24 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
         serializer = myserializers.FavoriteSerializer(
             data={"user": request.user.id, "recipe": recipe.id},
-            context={'request': request}
+            context={"request": request},
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        return response.Response(
-            serializer.data,
-            status=status.HTTP_201_CREATED
-        )
+        recipe_serializer = myserializers.RecipeShortSerializer(recipe, context={"request": request})
+        return response.Response(recipe_serializer.data, status=status.HTTP_201_CREATED)
 
     @favorite.mapping.delete
     def remove_from_favorite(self, request, pk=None):
         recipe = get_object_or_404(Recipe, pk=pk)
         deleted_count, _ = Favorite.objects.filter(
-            user=request.user,
-            recipe=recipe
+            user=request.user, recipe=recipe
         ).delete()
 
         if not deleted_count:
             return response.Response(
-                {'errors': 'Рецепт не найден в избранном'},
+                {"errors": "Рецепт не найден в избранном"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -289,8 +286,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 row_cells[0].text = str(idx)
                 row_cells[1].text = ing["ingredient__name"]
                 row_cells[2].text = (
-                    f"{ing['total_amount']} "
-                    f"{ing['ingredient__measurement_unit']}"
+                    f"{ing['total_amount']} " f"{ing['ingredient__measurement_unit']}"
                 )
         else:
             document.add_paragraph("Список покупок пуст!")
@@ -300,8 +296,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         buffer.seek(0)
 
         content_type = (
-            "application/vnd.openxmlformats-officedocument."
-            "wordprocessingml.document"
+            "application/vnd.openxmlformats-officedocument." "wordprocessingml.document"
         )
         return FileResponse(
             buffer,
