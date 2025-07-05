@@ -4,7 +4,7 @@ from pathlib import Path
 from django.core.management.utils import get_random_secret_key
 from dotenv import load_dotenv
 
-from backend.food import constants
+from food import constants
 
 
 load_dotenv()

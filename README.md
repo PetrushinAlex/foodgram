@@ -77,7 +77,7 @@ python manage.py add_ingidients_from_data
 Клонируйте репозиторий с проектом на свой компьютер.
 В терминале из рабочей директории выполните команду:
 ```bash
-git clone https://github.com/xofmdo/foodgram-project-react.git
+git clone git@github.com:PetrushinAlex/foodgram.git
 ```
 
 - в Docker cоздаем образ:
