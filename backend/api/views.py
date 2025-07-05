@@ -14,6 +14,7 @@ from django.contrib.auth import get_user_model
 from djoser.views import UserViewSet as DjoserUserViewSet
 from rest_framework.response import Response
 from rest_framework import permissions
+from django.shortcuts import redirect
 from hashids import Hashids
 from django.conf import settings
 
@@ -179,12 +180,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe.short_code = hashids.encode(recipe.id)
         recipe.save()
 
-    @action(detail=True, methods=["get"], url_path="get-link")
-    def link(self, request, *args, **kwargs):
-        recipe = self.get_object()
-        base_url = request.build_absolute_uri("/")[:-1]
-        short_url = f"{base_url}/r/{recipe.short_code}"
-        return response.Response({"short-link": short_url}, status=status.HTTP_200_OK)
+    @action(detail=False, methods=["get"], url_path="r/(?P<short_code>[^/.]+)")
+    def redirect_by_short_code(self, request, short_code=None):
+        recipe = get_object_or_404(Recipe, short_code=short_code)
+        return redirect(f"/recipes/{recipe.id}/") 
 
     @action(
         detail=True,
