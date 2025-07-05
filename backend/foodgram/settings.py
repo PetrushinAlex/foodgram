@@ -15,7 +15,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', get_random_secret_key())
 
 DEBUG = os.getenv('DEBUG', default=False) == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', default='127.0.0.1, localhost, *').split(', ')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', default='127.0.0.1, localhost, *, foodgrammick.hopto.org').split(', ')
 
 AUTH_USER_MODEL = 'users.ExtendedUser'
 
@@ -143,4 +143,4 @@ MEDIA_ROOT = "media"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CSRF_TRUSTED_ORIGINS = ['https://*', 'http://*', "http://84.201.176.249", "https://foodbook.sytes.net/recipes",  "http://foodbook.sytes.net/recipes"]
+CSRF_TRUSTED_ORIGINS = ['https://*', 'http://*', "http://84.201.176.249", "https://foodgrammick.hopto.org",  "http://foodgrammick.hopto.org"]
