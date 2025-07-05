@@ -112,7 +112,7 @@ class SubscriptionCreateSerializer(serializers.ModelSerializer):
         fields = ('user', 'author')
 
     def validate(self, data):
-        """Валидация при создании подписки"""
+        """Валидация при создании подписки."""
 
         user = self.context['request'].user
         author = self.context['view'].get_object()
@@ -129,10 +129,6 @@ class SubscriptionCreateSerializer(serializers.ModelSerializer):
 
         return data
 
-    def create(self, validated_data):
-        """Создание новой подписки"""
-        return Sub.objects.create(**validated_data)
-
 
 class FavoriteShoppingCartSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
@@ -143,19 +139,19 @@ class FavoriteShoppingCartSerializer(serializers.ModelSerializer):
 
 
 class FavoriteSerializer(FavoriteShoppingCartSerializer):
-    """Серик для избранного"""
+    """Сериализатор для избранного."""
 
     class Meta(FavoriteShoppingCartSerializer.Meta):
         model = Favorite
 
     def validate(self, data):
-        """есть ли уже в избранном"""
+        """Есть ли уже в избранном."""
         user = data['user']
         recipe = data['recipe']
 
         if Favorite.objects.filter(user=user, recipe=recipe).exists():
             raise serializers.ValidationError(
-                f"Рецепт '{recipe.name}' уже в избранном"
+                f"Рецепт '{recipe.name}' уже в избранном."
             )
         return data
 
@@ -355,7 +351,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         Проверяет, что изображение заполнено при создании нового рецепта.
         """
 
-        if self.context["request"].method == "POST" and not value:
+        if not value:
             raise serializers.ValidationError("Изображение не заполненно")
 
         return value
@@ -398,9 +394,6 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         Обновляет существующий рецепт.
         Полностью заменяет теги и ингредиенты.
         """
-
-        if "image" not in validated_data:
-            validated_data["image"] = instance.image
 
         i_data = validated_data.pop("recipe_ingredients", [])
         t_data = validated_data.pop("tags", [])
