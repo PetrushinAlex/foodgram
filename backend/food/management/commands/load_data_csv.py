@@ -8,7 +8,7 @@ class Command(BaseCommand):
     help_text = 'Загрузка списка ингредиентов в базу данных'
 
     def execute_command(self):
-        p = '../data/ingredients.csv'
+        p = 'food/data/ingredients.csv'
 
         try:
             with open(p, mode='r', encoding='UTF-8') as file:
