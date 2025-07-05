@@ -131,10 +131,10 @@ USE_L10N = True
 
 USE_TZ = True
 
-# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# CSRF_COOKIE_SECURE = True
-# SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "static"
@@ -143,4 +143,4 @@ MEDIA_ROOT = "media"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CSRF_TRUSTED_ORIGINS = ['https://*', 'http://*', "http://84.201.176.249"]
+CSRF_TRUSTED_ORIGINS = ['https://*', 'http://*', "http://84.201.176.249", "https://foodbook.sytes.net/recipes",  "http://foodbook.sytes.net/recipes"]
