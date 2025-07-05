@@ -4,7 +4,7 @@ from pathlib import Path
 from django.core.management.utils import get_random_secret_key
 from dotenv import load_dotenv
 
-from foodgram import constants
+from backend.food import constants
 
 
 load_dotenv()
@@ -67,9 +67,13 @@ WSGI_APPLICATION = 'foodgram.wsgi.application'
 
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB', 'django'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
+        'HOST': os.getenv('DB_HOST', '127.0.0.1'),
+        'USER': os.getenv('POSTGRES_USER', 'django'),
+        'PORT': os.getenv('DB_PORT', 5432),
     }
 }
 

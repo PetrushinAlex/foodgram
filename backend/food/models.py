@@ -4,7 +4,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from hashids import Hashids
 
-from foodgram import constants as cnst
+from backend.food import constants as cnst
 
 User = get_user_model()
 hashids = Hashids(salt=settings.SECRET_KEY, min_length=5)
