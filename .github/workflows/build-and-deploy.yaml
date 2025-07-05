@@ -1,4 +1,4 @@
-name: Task Workflow
+name: CI/CD for Foodgram
 
 on:
   push:
@@ -6,23 +6,8 @@ on:
       - main
 
 jobs:
-  lint:
+  backend_tests:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.11
-          cache: 'pip'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-
-  tests:
-    runs-on: ubuntu-latest
-    needs: lint
     services:
       postgres:
         image: postgres:13.10
@@ -32,131 +17,104 @@ jobs:
           POSTGRES_DB: django_db
         ports:
           - 5432:5432
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python
+      - name: Clone repository
+        uses: actions/checkout@v3
+
+      - name: Install Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.11
-          cache: 'pip'
+          python-version: "3.9"
 
-      - name: Install dependencies
+      - name: Install project dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r ./backend/requirements.txt
-
-      - name: Run Django tests
+          pip install -r backend/requirements.txt
         env:
           POSTGRES_USER: django_user
           POSTGRES_PASSWORD: django_password
           POSTGRES_DB: django_db
           DB_HOST: 127.0.0.1
           DB_PORT: 5432
-          SECRET_KEY: ${{ secrets.SECRET_KEY }}
-          DEBUG: ${{ secrets.DEBUG }}
-          ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
-          CSRF_TRUSTED_ORIGINS: ${{ secrets.CSRF_TRUSTED_ORIGINS }}
-        run: |
-          cd backend/
-          python manage.py test
 
-  build_and_push_backend:
-    name: Push Backend Docker Image to DockerHub
+  dockerize_backend:
+    name: Build and Push Backend Image
     runs-on: ubuntu-latest
-    needs: tests
+    needs: backend_tests
+
     steps:
-      - name: Check out the repository
+      - name: Fetch repository content
         uses: actions/checkout@v3
-      - name: Set up Docker Buildx
+
+      - name: Prepare Docker Buildx
         uses: docker/setup-buildx-action@v2
-      - name: Login to DockerHub
+
+      - name: Authenticate with DockerHub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
+          username: ${{ secrets.DOCKER_ACCOUNT }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Build and Push Backend Image
+
+      - name: Build and push backend image
         uses: docker/build-push-action@v4
         with:
-          context: ./backend/
+          context: backend/
           push: true
           tags: ${{ secrets.DOCKER_ACCOUNT }}/foodgram_backend:latest
 
-  frontend_tests:
+  dockerize_frontend:
+    name: Build and Push Frontend Image
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
 
-      - name: Install Frontend Dependencies
-        run: |
-          cd frontend/
-          npm install --legacy-peer-deps
-
-  build_and_push_frontend:
-    name: Push Frontend Docker Image to DockerHub
-    runs-on: ubuntu-latest
-    needs: frontend_tests
     steps:
-      - name: Check out the repository
+      - name: Get repository data
         uses: actions/checkout@v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+
       - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
+          username: ${{ secrets.DOCKER_ACCOUNT }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Build and Push Frontend Image
+
+      - name: Build and push frontend image
         uses: docker/build-push-action@v4
         with:
-          context: ./frontend/
+          context: frontend/
           push: true
           tags: ${{ secrets.DOCKER_ACCOUNT }}/foodgram_frontend:latest
 
-  build_and_push_gateway:
-    name: Push Gateway Docker Image to DockerHub
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out the repository
-        uses: actions/checkout@v3
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Build and Push Gateway Image
-        uses: docker/build-push-action@v4
-        with:
-          context: ./infra/
-          push: true
-          tags: ${{ secrets.DOCKER_ACCOUNT }}/foodgram_gateway:latest
-
-  deploy:
+  production_deploy:
+    name: Deploy to VPS
     runs-on: ubuntu-latest
     needs:
-      - build_and_push_backend
-      - build_and_push_frontend
-      - build_and_push_gateway
+      - dockerize_backend
+      - dockerize_frontend
+    if: github.ref == 'refs/heads/main'
+
     steps:
-      - name: Check out the repository
+      - name: Checkout code
         uses: actions/checkout@v3
-      - name: Copy docker-compose file via SSH
+
+      - name: Transfer Docker Compose file
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          source: 'docker-compose.production.yml'
-          target: 'foodgram'
+          source: docker-compose.production.yml
+          target: foodgram
 
-      - name: Execute Remote Commands via SSH
+      - name: Run deployment commands
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
@@ -168,20 +126,3 @@ jobs:
             sudo docker compose -f docker-compose.production.yml pull
             sudo docker compose -f docker-compose.production.yml down
             sudo docker compose -f docker-compose.production.yml up -d
-  
-  send_message:
-
-    runs-on: ubuntu-latest
-    needs: deploy
-    steps:
-
-      - name: Send message
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: |
-            Деплой проекта foodgram успешно выполнен!
-            Пользователь ${{ github.actor }} закоммитил со следующим сообщением "${{ github.event.commits[0].message }}".
-            [Перейти к коммиту](https://github.com/${{ github.repository }}/commit/${{github.sha}})
-          parse_mode: markdown
