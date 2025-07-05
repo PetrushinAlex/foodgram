@@ -193,7 +193,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def link(self, request, *args, **kwargs):
         recipe = self.get_object()
         base_url = request.build_absolute_uri('/')[:-1]
-        short_url = f'{base_url}/r/{recipe.short_code}'
+        short_url = f'{base_url}/api/recipes/r/{recipe.short_code}'
         return response.Response(
             {'short-link': short_url}, status=status.HTTP_200_OK
         )
