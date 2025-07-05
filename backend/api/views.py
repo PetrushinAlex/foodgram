@@ -99,23 +99,19 @@ class UserViewSet(DjoserUserViewSet):
         author = self.get_object()
         user = request.user
 
-        serializer = myserializers.SubscribeSerializer(
-            data={},
+        serializer = myserializers.SubscriptionCreateSerializer(
+            data={"user": user, "author": author},
             context={
                 'request': request,
                 'view': self
             }
         )
 
-        subscription = Sub(
-            user=user,
-            author=author
-        )
-        subscription = serializer.save()
-        data = serializer.to_representation(subscription)
+        serializer.is_valid(raise_exception=True) 
+        serializer.save()
 
         return response.Response(
-            data,
+            serializer.data,
             status=status.HTTP_201_CREATED
         )
 
