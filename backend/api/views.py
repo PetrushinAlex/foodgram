@@ -187,6 +187,19 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=True,
+        methods=['get'],
+        url_path='get-link'
+    )
+    def link(self, request, *args, **kwargs):
+        recipe = self.get_object()
+        base_url = request.build_absolute_uri('/')[:-1]
+        short_url = f'{base_url}/r/{recipe.short_code}'
+        return response.Response(
+            {'short-link': short_url}, status=status.HTTP_200_OK
+        )
+
+    @action(
+        detail=True,
         methods=["post"],
         url_name="shopping_cart",
         permission_classes=[permissions.IsAuthenticated],
