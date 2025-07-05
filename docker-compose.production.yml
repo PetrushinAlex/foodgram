@@ -1,44 +1,62 @@
-volumes:
-  pg_data:
-  static_volume:
-  media_volume:
 
+version: '3.3'
 services:
-  db:
-
-    image: postgres:14.8-bullseye
-    restart: always
+  frontend:
+    container_name: foodgram-frontend
+    image: jacka42/foodgram_frontend:latest
     volumes:
-      - pg_data:/var/lib/postgresql/data/
-    env_file:
-      - ./.env
+      - ../frontend/:/app/result_build/
+
+  nginx:
+    container_name: foodgram-nginx
+    image: nginx:1.25.4-alpine
+    ports:
+      - '80:80'
+      - '443:443'
+    depends_on:
+      - backend
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ../frontend/build:/usr/share/nginx/html/
+      - ../docs/:/usr/share/nginx/html/api/docs/
+      - static_volume:/var/html/static/
+      - media_volume:/var/html/media/
+      - /etc/letsencrypt/live/malonymclaren.sytes.net:/etc/letsencrypt/live/malonymclaren.sytes.net:ro
+      - /etc/letsencrypt/archive/malonymclaren.sytes.net:/etc/letsencrypt/archive/malonymclaren.sytes.net:ro
+      - /etc/letsencrypt/renewal:/etc/letsencrypt/renewal:ro
+      - /etc/letsencrypt/options-ssl-nginx.conf:/etc/letsencrypt/options-ssl-nginx.conf:ro
+      - /etc/letsencrypt/ssl-dhparams.pem:/etc/letsencrypt/ssl-dhparams.pem:ro
+
+  db:
+      container_name: db
+      image: postgres:14
+      env_file:
+      - .env
+      volumes:
+        - postgres_data:/var/lib/postgresql/data/
+      healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U postgres"]
+        interval: 5s
+        timeout: 3s
+        retries: 10
 
   backend:
-
-    image: jacka42/foodgram_backend
+    container_name: backend
+    image: jacka42/foodgram_backend:latest
+    command: >
+      sh -c 'python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             gunicorn foodgram.wsgi:application --bind 0.0.0.0:8000'
     volumes:
       - static_volume:/app/static/
       - media_volume:/app/media/
-    depends_on:
-      - db
     env_file:
-      - ./.env
-
-  frontend:
-
-    image: jacka42/foodgram_frontend
-    command: cp -r /app/build/. /static/
-    volumes:
-      - static_volume:/static
-
-  gateway:
-
-    image: jacka42/foodgram_gateway
-    restart: always
-    ports:
-      - 8000:80
-    volumes:
-      - static_volume:/static/
-      - media_volume:/var/html/media/
+      - .env
     depends_on:
-      - frontend
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
