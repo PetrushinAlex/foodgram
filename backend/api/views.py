@@ -18,8 +18,6 @@ from django.shortcuts import redirect
 from hashids import Hashids
 from django.conf import settings
 
-hashids = Hashids(salt=settings.SECRET_KEY, min_length=5)
-
 from . import serializers as myserializers
 from food.models import (
     Recipe,
@@ -35,6 +33,9 @@ from api import (
     filters as tools_filters,
     permissions as tools_permissions,
 )
+
+
+hashids = Hashids(salt=settings.SECRET_KEY, min_length=5)
 
 User = get_user_model()
 
@@ -106,14 +107,16 @@ class UserViewSet(DjoserUserViewSet):
 
         # if not request.user.is_authenticated:
         #     return Response({"error": "Требуется авторизация"}, status=401)
-    
+
         if user == author:
             return response.Response(
-                {"error": "Нельзя подписаться на себя"}, status=status.HTTP_400_BAD_REQUEST
+                {"error": "Нельзя подписаться на себя"},
+                status=status.HTTP_400_BAD_REQUEST
             )
         if Sub.objects.filter(user=user, author=author).exists():
             return response.Response(
-                {"error": "Вы уже подписаны"}, status=status.HTTP_400_BAD_REQUEST
+                {"error": "Вы уже подписаны"},
+                status=status.HTTP_400_BAD_REQUEST
             )
 
         serializer = myserializers.SubscriptionCreateSerializer(
@@ -126,14 +129,20 @@ class UserViewSet(DjoserUserViewSet):
         response_serializer = myserializers.AuthorWithRecipesSerializer(
             author, context={"request": request}
         )
-        return response.Response(response_serializer.data, status=status.HTTP_201_CREATED)
+        return response.Response(
+            response_serializer.data,
+            status=status.HTTP_201_CREATED
+        )
 
     @subscribe.mapping.delete
     def unsubscribe(self, request, *args, **kwargs):
         author = self.get_object()
         user = request.user
 
-        deleted_count, _ = Sub.objects.filter(user=user, author=author).delete()
+        deleted_count, _ = Sub.objects.filter(
+            user=user,
+            author=author
+        ).delete()
 
         if not deleted_count:
             return response.Response(
@@ -183,7 +192,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["get"], url_path="r/(?P<short_code>[^/.]+)")
     def redirect_by_short_code(self, request, short_code=None):
         recipe = get_object_or_404(Recipe, short_code=short_code)
-        return redirect(f"/recipes/{recipe.id}/") 
+        return redirect(f"/recipes/{recipe.id}/")
 
     @action(
         detail=True,
@@ -214,7 +223,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        return response.Response(serializer.data, status=status.HTTP_201_CREATED)
+        return response.Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED
+        )
 
     @shopping_cart.mapping.delete
     def remove_from_shopping_cart(self, request, pk=None):
@@ -247,8 +259,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        recipe_serializer = myserializers.RecipeShortSerializer(recipe, context={"request": request})
-        return response.Response(recipe_serializer.data, status=status.HTTP_201_CREATED)
+        recipe_serializer = myserializers.RecipeShortSerializer(
+            recipe,
+            context={"request": request}
+        )
+        return response.Response(
+            recipe_serializer.data,
+            status=status.HTTP_201_CREATED
+        )
 
     @favorite.mapping.delete
     def remove_from_favorite(self, request, pk=None):
@@ -298,7 +316,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 row_cells[0].text = str(idx)
                 row_cells[1].text = ing["ingredient__name"]
                 row_cells[2].text = (
-                    f"{ing['total_amount']} " f"{ing['ingredient__measurement_unit']}"
+                    f"{ing['total_amount']} " 
+                    f"{ing['ingredient__measurement_unit']}"
                 )
         else:
             document.add_paragraph("Список покупок пуст!")
@@ -308,7 +327,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         buffer.seek(0)
 
         content_type = (
-            "application/vnd.openxmlformats-officedocument." "wordprocessingml.document"
+            "application/vnd.openxmlformats-officedocument."
+            "wordprocessingml.document"
         )
         return FileResponse(
             buffer,
