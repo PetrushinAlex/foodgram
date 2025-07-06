@@ -316,7 +316,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 row_cells[0].text = str(idx)
                 row_cells[1].text = ing["ingredient__name"]
                 row_cells[2].text = (
-                    f"{ing['total_amount']} " 
+                    f"{ing['total_amount']} "
                     f"{ing['ingredient__measurement_unit']}"
                 )
         else:
