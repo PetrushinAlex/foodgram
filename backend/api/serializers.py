@@ -101,8 +101,6 @@ class SubscribeSerializer(UserSerializer):
         )
 
     def get_is_subscribed(self, obj):
-        request = self.context.get("request")
-        user = request.user if request else None
         return True
 
     def get_recipes(self, obj):
