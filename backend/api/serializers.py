@@ -344,6 +344,9 @@ class AuthorWithRecipesSerializer(serializers.ModelSerializer):
             context=self.context
         ).data
 
+    def get_recipes_count(self, obj):
+        return obj.recipes.count()
+
 
 class RecipeReadSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
