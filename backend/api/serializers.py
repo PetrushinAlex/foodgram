@@ -76,34 +76,18 @@ class RecipeSimpleSerializer(serializers.ModelSerializer):
         )
 
 
-class SubscribeSerializer(UserSerializer):
-    """Сериализатор для отображения подписок пользователя."""
+class SubscribeSerializer(UserSerializer): 
+
+    """Сериализатор для отображения подписок пользователя.""" 
 
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.ReadOnlyField(source="recipes.count")
-    first_name = serializers.CharField()
-    last_name = serializers.CharField()
-    is_subscribed = serializers.SerializerMethodField()
-    avatar = serializers.CharField(allow_null=True)
 
     class Meta:
         model = User
-        fields = (
-            "id",
-            "username",
-            "email",
-            "first_name",
-            "last_name",
-            "is_subscribed",
-            "avatar",
-            "recipes",
-            "recipes_count",
-        )
+        fields = ('id', 'username', 'email', 'recipes', 'recipes_count')
 
-    def get_is_subscribed(self, obj):
-        return True
-
-    def get_recipes(self, obj):
+    def get_recipes(self, obj): 
         """Возвращает ограниченное количество рецептов пользователя."""
         request = self.context.get("request")
         recipes = obj.recipes.all()
@@ -115,7 +99,8 @@ class SubscribeSerializer(UserSerializer):
             pass
 
         return RecipeSimpleSerializer(
-            recipes, many=True,
+            recipes,
+            many=True,
             context=self.context
         ).data
 
