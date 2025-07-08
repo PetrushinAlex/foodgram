@@ -11,4 +11,4 @@ class Paginator(PageNumberPagination):
     """
 
     page_size = app_constants.DEFAULT_PAGE_SIZE
-    page_size_query_param = 'limit'
+    page_size_query_param = "limit"

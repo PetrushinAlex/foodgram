@@ -3,33 +3,33 @@ from rest_framework import routers
 
 from . import views
 
-app_name = 'api'
+app_name = "api"
 
 router_v1 = routers.DefaultRouter()
 
 router_v1.register(
-    'recipes',
+    "recipes",
     views.RecipeViewSet,
-    basename='recipes'
+    basename="recipes"
 )
 router_v1.register(
-    'tags',
+    "tags",
     views.TagViewSet,
-    basename='tags'
+    basename="tags"
 )
 router_v1.register(
-    'ingredients',
+    "ingredients",
     views.IngredientViewSet,
-    basename='ingredients'
+    basename="ingredients"
 )
 
 router_v1.register(
-    'users',
+    "users",
     views.UserViewSet,
-    basename='users'
+    basename="users"
 )
 
 urlpatterns = [
-    path('', include(router_v1.urls)),
-    path('auth/', include('djoser.urls.authtoken')),
+    path("", include(router_v1.urls)),
+    path("auth/", include("djoser.urls.authtoken")),
 ]
