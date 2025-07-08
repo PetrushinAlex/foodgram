@@ -143,6 +143,14 @@ class SubscriptionCreateSerializer(serializers.ModelSerializer):
 
         return data
 
+    def to_representation(self, instance):
+        author = instance.author
+        author_serializer = AuthorWithRecipesSerializer(
+            author,
+            context=self.context
+        )
+        return author_serializer.data
+
 
 class FavoriteShoppingCartSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())

@@ -112,11 +112,8 @@ class UserViewSet(DjoserUserViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        response_serializer = myserializers.AuthorWithRecipesSerializer(
-            author, context={"request": request}
-        )
         return response.Response(
-            response_serializer.data,
+            serializer.data,
             status=status.HTTP_201_CREATED
         )
 
