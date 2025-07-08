@@ -1,6 +1,6 @@
 from rest_framework.pagination import PageNumberPagination
 
-from food import constants as app_constants
+from api import constants as app_constants
 
 
 class Paginator(PageNumberPagination):
