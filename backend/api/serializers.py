@@ -85,7 +85,20 @@ class SubscribeSerializer(UserSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'recipes', 'recipes_count')
+        fields = (
+            "id",
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "is_subscribed",
+            "avatar",
+            "recipes",
+            "recipes_count",
+        )
+
+    def get_is_subscribed(self, obj):
+        return True
 
     def get_recipes(self, obj): 
         """Возвращает ограниченное количество рецептов пользователя."""
