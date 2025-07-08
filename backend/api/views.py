@@ -48,23 +48,23 @@ class UserViewSet(DjoserUserViewSet):
     pagination_class = tools_paginators.Paginator
 
     def get_serializer_class(self):
-        if self.action == 'list':
+        if self.action == "list":
             return myserializers.UserSerializer
-        elif self.action == 'retrieve':
+        elif self.action == "retrieve":
             return myserializers.UserSerializer
         return super().get_serializer_class()
 
     def get_permissions(self):
-        if self.action == 'list':
+        if self.action == "list":
             return [permissions.AllowAny()]
-        elif self.action == 'retrieve':
+        elif self.action == "retrieve":
             return [permissions.AllowAny()]
         return super().get_permissions()
 
     @action(
-        methods=['get'],
+        methods=["get"],
         detail=False,
-        url_path='me',
+        url_path="me",
         permission_classes=[IsAuthenticated],
     )
     def me(self, request, *args, **kwargs):
@@ -72,18 +72,18 @@ class UserViewSet(DjoserUserViewSet):
 
     @action(
         detail=False,
-        methods=['put'],
+        methods=["put"],
         permission_classes=[IsAuthenticated],
-        url_path='me/avatar',
+        url_path="me/avatar",
     )
     def avatar(self, request, *args, **kwargs):
         serializer = myserializers.AvatarSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        request.user.avatar = serializer.validated_data['avatar']
+        request.user.avatar = serializer.validated_data["avatar"]
         request.user.save()
 
         response_serializer = myserializers.AvatarSerializer(
-            request.user, context={'request': request}
+            request.user, context={"request": request}
         )
         return Response(response_serializer.data, status=status.HTTP_200_OK)
 
@@ -97,9 +97,9 @@ class UserViewSet(DjoserUserViewSet):
 
     @action(
         detail=True,
-        methods=['post'],
+        methods=["post"],
         permission_classes=[permissions.IsAuthenticated],
-        url_path='subscribe',
+        url_path="subscribe",
     )
     def subscribe(self, request, *args, **kwargs):
         author = self.get_object()
@@ -107,24 +107,24 @@ class UserViewSet(DjoserUserViewSet):
 
         if user == author:
             return response.Response(
-                {'error': 'Нельзя подписаться на себя'},
+                {"error": "Нельзя подписаться на себя"},
                 status=status.HTTP_400_BAD_REQUEST
             )
         if Sub.objects.filter(user=user, author=author).exists():
             return response.Response(
-                {'error': 'Вы уже подписаны'},
+                {"error": "Вы уже подписаны"},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
         serializer = myserializers.SubscriptionCreateSerializer(
-            data={'user': user.id, 'author': author.id},
-            context={'request': request, 'view': self},
+            data={"user": user.id, "author": author.id},
+            context={"request": request, "view": self},
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
         response_serializer = myserializers.AuthorWithRecipesSerializer(
-            author, context={'request': request}
+            author, context={"request": request}
         )
         return response.Response(
             response_serializer.data,
@@ -143,7 +143,7 @@ class UserViewSet(DjoserUserViewSet):
 
         if not deleted_count:
             return response.Response(
-                {'errors': 'Подписка не найдена.'},
+                {"errors": "Подписка не найдена."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -151,16 +151,16 @@ class UserViewSet(DjoserUserViewSet):
 
     @action(
         detail=False,
-        methods=['get'],
+        methods=["get"],
         permission_classes=[permissions.IsAuthenticated],
-        url_path='subscriptions',
+        url_path="subscriptions",
     )
     def subscriptions(self, request, *args, **kwargs):
         user = request.user
         queryset = User.objects.filter(users_subscribers__user=user)
         pages = self.paginate_queryset(queryset)
         serializer = myserializers.SubscribeSerializer(
-            pages, many=True, context={'request': request}
+            pages, many=True, context={"request": request}
         )
         return self.get_paginated_response(serializer.data)
 
@@ -176,7 +176,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filterset_class = tools_filters.RecipeFilter
 
     def get_serializer_class(self):
-        if self.action in ['list', 'retrieve']:
+        if self.action in ["list", "retrieve"]:
             return myserializers.RecipeReadSerializer
         return myserializers.RecipeWriteSerializer
 
@@ -186,10 +186,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe.short_code = hashids.encode(recipe.id)
         recipe.save()
 
-    @action(detail=False, methods=['get'], url_path='r/(?P<short_code>[^/.]+)')
+    @action(detail=False, methods=["get"], url_path="r/(?P<short_code>[^/.]+)")
     def redirect_by_short_code(self, request, short_code=None):
         recipe = get_object_or_404(Recipe, short_code=short_code)
-        return redirect(f'/recipes/{recipe.id}/')
+        return redirect(f"/recipes/{recipe.id}/")
 
     @action(
         detail=True,
@@ -206,16 +206,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=True,
-        methods=['post'],
-        url_name='shopping_cart',
+        methods=["post"],
+        url_name="shopping_cart",
         permission_classes=[permissions.IsAuthenticated],
     )
     def shopping_cart(self, request, pk=None):
         recipe = get_object_or_404(Recipe, id=pk)
 
         serializer = myserializers.ShoppingCartSerializer(
-            data={'user': request.user.id, 'recipe': recipe.id},
-            context={'request': request},
+            data={"user": request.user.id, "recipe": recipe.id},
+            context={"request": request},
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -234,7 +234,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
         if not deleted_count:
             return response.Response(
-                {'errors': 'Рецепт не найден в корзине'},
+                {"errors": "Рецепт не найден в корзине"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -242,23 +242,23 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=True,
-        methods=['post'],
-        url_name='favorite',
+        methods=["post"],
+        url_name="favorite",
         permission_classes=[permissions.IsAuthenticated],
     )
     def favorite(self, request, pk=None):
         recipe = get_object_or_404(Recipe, id=pk)
 
         serializer = myserializers.FavoriteSerializer(
-            data={'user': request.user.id, 'recipe': recipe.id},
-            context={'request': request},
+            data={"user": request.user.id, "recipe": recipe.id},
+            context={"request": request},
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
         recipe_serializer = myserializers.RecipeShortSerializer(
             recipe,
-            context={'request': request}
+            context={"request": request}
         )
         return response.Response(
             recipe_serializer.data,
@@ -274,7 +274,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
         if not deleted_count:
             return response.Response(
-                {'errors': 'Рецепт не найден в избранном'},
+                {"errors": "Рецепт не найден в избранном"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -282,55 +282,55 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=False,
-        methods=['get'],
-        url_path='download_shopping_cart',
+        methods=["get"],
+        url_path="download_shopping_cart",
         permission_classes=[permissions.IsAuthenticated],
     )
     def download_shopping_cart(self, request):
         document = Document()
-        document.add_heading('Список покупок', level=1)
+        document.add_heading("Список покупок", level=1)
 
         recipes_shop = request.user.shopping_cart.all()
         ingredients = (
             RecipeIngredient.objects.filter(
-                recipe__in=recipes_shop.values_list('recipe', flat=True)
+                recipe__in=recipes_shop.values_list("recipe", flat=True)
             )
-            .values('ingredient__name', 'ingredient__measurement_unit')
-            .annotate(total_amount=Sum('amount'))
-            .order_by('ingredient__name')
+            .values("ingredient__name", "ingredient__measurement_unit")
+            .annotate(total_amount=Sum("amount"))
+            .order_by("ingredient__name")
         )
 
         if ingredients:
             table = document.add_table(rows=1, cols=3)
-            table.style = 'Table Grid'
+            table.style = "Table Grid"
             hdr_cells = table.rows[0].cells
-            hdr_cells[0].text = '№'
-            hdr_cells[1].text = 'Ингредиент'
-            hdr_cells[2].text = 'Количество'
+            hdr_cells[0].text = "№"
+            hdr_cells[1].text = "Ингредиент"
+            hdr_cells[2].text = "Количество"
 
             for idx, ing in enumerate(ingredients, start=1):
                 row_cells = table.add_row().cells
                 row_cells[0].text = str(idx)
-                row_cells[1].text = ing['ingredient__name']
+                row_cells[1].text = ing["ingredient__name"]
                 row_cells[2].text = (
-                    f'{ing['total_amount']} '
-                    f'{ing['ingredient__measurement_unit']}'
+                    f"{ing['total_amount']} "
+                    f"{ing['ingredient__measurement_unit']}"
                 )
         else:
-            document.add_paragraph('Список покупок пуст!')
+            document.add_paragraph("Список покупок пуст!")
 
         buffer = BytesIO()
         document.save(buffer)
         buffer.seek(0)
 
         content_type = (
-            'application/vnd.openxmlformats-officedocument.'
-            'wordprocessingml.document'
+            "application/vnd.openxmlformats-officedocument."
+            "wordprocessingml.document"
         )
         return FileResponse(
             buffer,
             as_attachment=True,
-            filename='shopping_list.docx',
+            filename="shopping_list.docx",
             content_type=content_type,
         )
 
@@ -352,7 +352,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     Создание и редактирование только в админке.
     """
 
-    queryset = Ingredient.objects.all().order_by(Lower('name'))
+    queryset = Ingredient.objects.all().order_by(Lower("name"))
     serializer_class = myserializers.IngredientSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = tools_filters.IngredientSearchFilter
@@ -362,6 +362,6 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 def redirect_to_recipe(request, short_code):
     recipe = get_object_or_404(Recipe, short_code=short_code)
     url = request.build_absolute_uri(
-        reverse('recipes-detail', kwargs={'pk': recipe.pk})
+        reverse("recipes-detail", kwargs={"pk": recipe.pk})
     )
     return HttpResponseRedirect(url)
