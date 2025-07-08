@@ -76,9 +76,9 @@ class RecipeSimpleSerializer(serializers.ModelSerializer):
         )
 
 
-class SubscribeSerializer(UserSerializer): 
+class SubscribeSerializer(UserSerializer):
 
-    """Сериализатор для отображения подписок пользователя.""" 
+    """Сериализатор для отображения подписок пользователя."""
 
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.ReadOnlyField(source="recipes.count")
