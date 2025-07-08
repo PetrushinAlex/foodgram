@@ -10,21 +10,21 @@ class CustomUserAdmin(UserAdmin):
     Кастомный класс для регистрации модели пользователя в админке.
     """
     list_display = (
-        'id',
-        'username',
-        'email',
-        'first_name',
-        'last_name',
+        "id",
+        "username",
+        "email",
+        "first_name",
+        "last_name",
     )
     list_filter = (
-        'username',
-        'email',
+        "username",
+        "email",
     )
     search_fields = (
-        'username',
-        'email',
-        'first_name',
-        'last_name',
+        "username",
+        "email",
+        "first_name",
+        "last_name",
     )
 
 
@@ -35,11 +35,11 @@ class SubAdmin(admin.ModelAdmin):
     у автора и подписчика.
     """
     list_display = (
-        'id',
-        'author',
-        'user',
+        "id",
+        "author",
+        "user",
     )
     search_fields = (
-        'author__username',
-        'user__username',
+        "author__username",
+        "user__username",
     )
