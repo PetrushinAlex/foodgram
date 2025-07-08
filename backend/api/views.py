@@ -105,17 +105,6 @@ class UserViewSet(DjoserUserViewSet):
         author = self.get_object()
         user = request.user
 
-        if user == author:
-            return response.Response(
-                {"error": "Нельзя подписаться на себя"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        if Sub.objects.filter(user=user, author=author).exists():
-            return response.Response(
-                {"error": "Вы уже подписаны"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
         serializer = myserializers.SubscriptionCreateSerializer(
             data={"user": user.id, "author": author.id},
             context={"request": request, "view": self},
