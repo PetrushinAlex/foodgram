@@ -333,11 +333,12 @@ class AuthorWithRecipesSerializer(serializers.ModelSerializer):
 
         try:
             limit = int(request.GET.get("recipes_limit", 0))
-            recipes = recipes[:limit]
+            if limit > 0:
+                recipes = recipes[:limit]
         except (ValueError, TypeError):
             pass
 
-        return RecipeSimpleSerializer(
+        return RecipeShortSerializer(
             recipes,
             many=True,
             context=self.context
