@@ -101,13 +101,13 @@ class SubscribeSerializer(UserSerializer):
         return True
 
     def get_recipes(self, obj):
+        """Возвращает ограниченное количество рецептов пользователя."""
         request = self.context.get("request")
         recipes = obj.recipes.all()
 
         try:
             limit = int(request.GET.get("recipes_limit", 0))
-            if limit > 0:
-                recipes = recipes[:limit]
+            recipes = recipes[:limit]
         except (ValueError, TypeError):
             pass
 
