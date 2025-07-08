@@ -100,7 +100,7 @@ class SubscribeSerializer(UserSerializer):
     def get_is_subscribed(self, obj):
         return True
 
-    def get_recipes(self, obj): 
+    def get_recipes(self, obj):
         """Возвращает ограниченное количество рецептов пользователя."""
         request = self.context.get("request")
         recipes = obj.recipes.all()
@@ -329,25 +329,19 @@ class AuthorWithRecipesSerializer(serializers.ModelSerializer):
 
     def get_recipes(self, obj):
         request = self.context.get("request")
-        limit = None
-        if request:
-            try:
-                limit_param = request.query_params.get("recipes_limit")
-                if limit_param is not None:
-                    limit = int(limit_param)
-                    if limit < 0:
-                        limit = None
-            except ValueError:
-                limit = None
+        recipes = obj.recipes.all()
 
-        recipes_qs = obj.recipes.all()
-        if limit is not None:
-            recipes_qs = recipes_qs[:limit]
+        try:
+            limit = int(request.GET.get("recipes_limit", 0))
+            recipes = recipes[:limit]
+        except (ValueError, TypeError):
+            pass
 
-        return RecipeShortSerializer(recipes_qs, many=True).data
-
-    def get_recipes_count(self, obj):
-        return obj.recipes.count()
+        return RecipeSimpleSerializer(
+            recipes,
+            many=True,
+            context=self.context
+        ).data
 
 
 class RecipeReadSerializer(serializers.ModelSerializer):
