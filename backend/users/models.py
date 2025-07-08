@@ -12,33 +12,33 @@ class ExtendedUser(AbstractUser):
     """
 
     email = models.EmailField(
-        verbose_name="Электронная почта",
+        verbose_name='Электронная почта',
         unique=True,
     )
     first_name = models.CharField(
         max_length=constants.MAX_LENGHT_NAME,
-        verbose_name="Имя",
+        verbose_name='Имя',
     )
     last_name = models.CharField(
         max_length=constants.MAX_LENGHT_NAME,
-        verbose_name="Фамилия",
+        verbose_name='Фамилия',
     )
     avatar = models.ImageField(
-        upload_to="avatars/",
-        default="avatars/default_avatar.png",
+        upload_to='avatars/',
+        default='avatars/default_avatar.png',
         null=True,
     )
 
-    REQUIRED_FIELDS = ["username", "first_name", "last_name", "password"]
-    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name', 'password']
+    USERNAME_FIELD = 'email'
 
     class Meta:
-        ordering = ("username",)
-        verbose_name = "Пользователь"
-        verbose_name_plural = "Пользователи"
+        ordering = ('username',)
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
 
     def __str__(self):
-        return f"Пользователь {self.username} ({self.email})"
+        return f'Пользователь {self.username} ({self.email})'
 
 
 class Sub(models.Model):
@@ -56,31 +56,31 @@ class Sub(models.Model):
     user = models.ForeignKey(
         ExtendedUser,
         on_delete=models.CASCADE,
-        related_name="subscriptions",
-        verbose_name="кто подписался",
+        related_name='subscriptions',
+        verbose_name='кто подписался',
     )
     author = models.ForeignKey(
         ExtendedUser,
         on_delete=models.CASCADE,
-        related_name="users_subscribers",
-        verbose_name="на кого подписались",
+        related_name='users_subscribers',
+        verbose_name='на кого подписались',
     )
 
     class Meta:
-        verbose_name = "Подписчик"
-        verbose_name_plural = "Подписчики"
+        verbose_name = 'Подписчик'
+        verbose_name_plural = 'Подписчики'
         constraints = [
             models.UniqueConstraint(
                 fields=(
-                    "user",
-                    "author",
+                    'user',
+                    'author',
                 ),
-                name="unique_sub",
+                name='unique_sub',
             )
         ]
 
         def __str__(self):
             return (
-                f"Пользователь {self.user.username} "
-                f"подписан на {self.author.username}"
+                f'Пользователь {self.user.username} '
+                f'подписан на {self.author.username}'
             )
