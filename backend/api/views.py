@@ -107,7 +107,7 @@ class UserViewSet(DjoserUserViewSet):
 
         serializer = myserializers.SubscriptionCreateSerializer(
             data={"user": user.id, "author": author.id},
-            context={"request": request, "author": author},
+            context={"request": request, "view": self},
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
