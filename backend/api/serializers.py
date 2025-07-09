@@ -137,9 +137,8 @@ class SubscriptionCreateSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         """Возвращаем данные автора в AuthorWithRecipesSerializer."""
-        author = instance.author
         author_serializer = AuthorWithRecipesSerializer(
-            author,
+            instance.author,
             context=self.context
         )
         return author_serializer.data
