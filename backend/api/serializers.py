@@ -85,14 +85,7 @@ class SubscribeSerializer(UserSerializer):
 
     class Meta:
         model = User
-        fields = (
-            "id",
-            "username",
-            "email",
-            "first_name",
-            "last_name",
-            "is_subscribed",
-            "avatar",
+        fields = UserSerializer.Meta.fields + (
             "recipes",
             "recipes_count",
         )
@@ -147,7 +140,7 @@ class SubscriptionCreateSerializer(serializers.ModelSerializer):
         author = instance.author
         author_serializer = AuthorWithRecipesSerializer(
             author,
-            context={"request": self.context["request"]}
+            context=self.context
         )
         return author_serializer.data
 
