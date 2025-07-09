@@ -120,9 +120,8 @@ class SubscriptionCreateSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         """Валидация при создании подписки."""
-
-        user = self.context["request"].user
-        author = self.context["view"].get_object()
+        user = data["user"]
+        author = data["author"]
 
         if user == author:
             raise serializers.ValidationError(
@@ -137,6 +136,7 @@ class SubscriptionCreateSerializer(serializers.ModelSerializer):
         return data
 
     def to_representation(self, instance):
+        """Возвращаем данные автора в AuthorWithRecipesSerializer."""
         author = instance.author
         author_serializer = AuthorWithRecipesSerializer(
             author,
