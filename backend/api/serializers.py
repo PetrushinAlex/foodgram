@@ -283,15 +283,7 @@ class AuthorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = (
-            "id",
-            "username",
-            "first_name",
-            "last_name",
-            "email",
-            "is_subscribed",
-            "avatar",
-        )
+        fields = UserSerializer.Meta.fields
 
     def get_is_subscribed(self, obj):
         user = self.context.get("request").user
@@ -307,14 +299,7 @@ class AuthorWithRecipesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = (
-            "id",
-            "username",
-            "first_name",
-            "last_name",
-            "email",
-            "is_subscribed",
-            "avatar",
+        fields = UserSerializer.Meta.fields + (
             "recipes",
             "recipes_count",
         )
