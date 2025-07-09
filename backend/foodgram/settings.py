@@ -143,6 +143,4 @@ MEDIA_ROOT = "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-CSRF_TRUSTED_ORIGINS = os.getenv(
-    "CSRF_TRUSTED", default="https://*, http://*, http://84.201.176.249, https://foodgrammick.hopto.org, http://foodgrammick.hopto.org"
-).split(", ")
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED", default="https://*, http://*").split(", ")
