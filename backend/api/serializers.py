@@ -147,7 +147,7 @@ class SubscriptionCreateSerializer(serializers.ModelSerializer):
         author = instance.author
         author_serializer = AuthorWithRecipesSerializer(
             author,
-            context=self.context
+            context={"request": self.context["request"]}
         )
         return author_serializer.data
 
